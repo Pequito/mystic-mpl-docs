@@ -36,6 +36,4 @@ Initial focus areas:
 ├── LICENSE
 ├── README.md
 ├── CONTRIBUTING.md
-    ├── hello_world.mps
-    ├── ansi_example.mps
-    └── menu_example.mps
+```
