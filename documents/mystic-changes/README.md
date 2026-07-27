@@ -1,31 +1,22 @@
 # Mystic BBS Changes and Updates
 
-This folder provides a structured reference to Mystic BBS release-history and `WHATSNEW.TXT` information.
+This folder contains standalone documentation describing how Mystic BBS changed across major versions and how those changes affected Mystic Programming Language (MPL) and embedded Python scripts (`.mpy`).
 
-The files in this folder are intended to support the MPL documentation project by recording:
+The reader should not need another wiki or release-history site to understand the documented changes. Each version file explains the relevant software behavior directly and includes upgrade considerations for SysOps, MPL developers, and MPY developers.
 
-- Mystic version changes
-- MPL language additions and removals
-- MPL compiler behavior changes
-- New built-in functions and procedures
-- Renamed or removed MPL symbols
-- Data-record and runtime changes that affect MPL programs
-- Version-specific compatibility notes
-- Documentation pages that may need revision
+## Documentation Scope
 
-These files summarize and organize upstream information. They are not intended to replace the original Mystic release notes or `WHATSNEW.TXT` files.
+Each version file is organized into the following areas:
 
-## Change Markers
+1. **Release summary** — the overall direction of the release.
+2. **Mystic software changes** — changes to the BBS, configuration tools, servers, message and file bases, editors, menus, and utilities.
+3. **MPL changes** — compiler, syntax, runtime, variable, function, procedure, and integration changes.
+4. **MPY and Python changes** — embedded Python engine, script execution, functions, dictionaries, and compatibility changes.
+5. **Compatibility impact** — behavior that may break or alter existing configurations and scripts.
+6. **Upgrade actions** — practical checks or migrations recommended when moving to that version.
+7. **Documentation impact** — pages in this project that may require updates because of the release.
 
-Mystic release notes traditionally use these markers:
-
-| Marker | Meaning |
-|---|---|
-| `+` | New or changed feature |
-| `!` | Bug fix |
-| `-` | Removed feature |
-
-## Version Files
+## Version Index
 
 - [Mystic 1.05](Mystic-1.05.md)
 - [Mystic 1.06](Mystic-1.06.md)
@@ -36,44 +27,92 @@ Mystic release notes traditionally use these markers:
 - [Mystic 1.11](Mystic-1.11.md)
 - [Mystic 1.12](Mystic-1.12.md)
 
-## MPL Cross-Version Index
+## Cross-Version Scripting Index
 
-See [MPL Change Index](MPL-Change-Index.md) for changes grouped by MPL topic rather than Mystic version.
+See [MPL and MPY Change Index](MPL-Change-Index.md) for a condensed scripting-language timeline.
 
-## Adding New Entries
+## Terminology
 
-Use [Entry Template](ENTRY-TEMPLATE.md) when documenting another version, alpha release, or individual change.
+### MPL
 
-Each recorded change should identify:
+**MPL** means Mystic Programming Language, the Pascal-influenced language used to create Mystic scripts and modules.
 
-1. Mystic version or alpha build
-2. Change type
-3. Upstream wording summarized in original language
-4. MPL or documentation impact
-5. Verification status
-6. Related wiki pages
-7. Official source
+### MPS
 
-## Verification Status
+An `.mps` file is MPL source code.
 
-Use one of these values:
+### MPE
+
+Older Mystic releases commonly used **MPE** to describe the execution engine and used `.mpe` for compiled scripts. Historical version files retain the term when discussing behavior from those releases.
+
+### MPX
+
+Mystic 1.10 changed the compiled MPL extension from `.mpe` to `.mpx`. Current documentation should use `.mpx` for compiled MPL programs unless describing an older release.
+
+### MPY
+
+An `.mpy` file is a Python script executed by Mystic's embedded Python engine. Embedded Python first appeared during the Mystic 1.12 development cycle.
+
+### Python 2 and Python 3
+
+Early MPY support used Python 2.7 syntax. Later Mystic 1.12 alpha builds replaced the original engine with one capable of loading Python 2 or Python 3 and added separate execution methods for Python 3.
+
+## Change Categories
+
+The version files use the following labels:
+
+| Label | Meaning |
+|---|---|
+| **Added** | A new capability became available |
+| **Changed** | Existing behavior or syntax was modified |
+| **Fixed** | A defect or incorrect behavior was corrected |
+| **Removed** | A capability, name, command, or compatibility path was deleted |
+| **Migration required** | Existing scripts or configuration may require manual changes |
+| **Recompile recommended** | Existing MPL source should be rebuilt with the target compiler |
+| **Version-sensitive** | Behavior may differ among alpha builds or platforms |
+
+## Documentation Policy
+
+These files are written as original summaries for this project.
+
+- Do not make the reader leave this repository to understand a change.
+- Do not copy complete third-party release notes verbatim.
+- Preserve exact identifiers when needed, including command names, variables, functions, extensions, and menu actions.
+- Explain why a change matters to a SysOp or script developer.
+- Separate software-wide changes from MPL and MPY changes.
+- State when Python support did not yet exist.
+- Identify breaking changes and required migrations clearly.
+- Record the exact Mystic alpha build when behavior changed during the 1.12 development cycle.
+
+## Adding a Version or Build
+
+Use [Entry Template](ENTRY-TEMPLATE.md) when documenting another release or alpha build.
+
+A new entry should answer:
+
+- What changed in Mystic itself?
+- What changed in MPL?
+- What changed in MPY or the embedded Python engine?
+- What existing configuration or source code could be affected?
+- What should be tested after upgrading?
+- Which documentation pages need revision?
+
+## Verification Levels
 
 | Status | Meaning |
 |---|---|
-| `Source indexed` | Official source has been linked, but details are not fully extracted |
-| `Summarized` | Important changes have been summarized |
-| `Compiler tested` | Relevant MPL syntax compiled successfully |
-| `Runtime tested` | Compiled behavior was tested inside Mystic |
-| `Version specific` | Behavior is confirmed only for a recorded version |
-| `Needs review` | Information is incomplete or conflicting |
+| **Documented** | The change has been explained in this repository |
+| **Compiler verified** | Related MPL source compiled with the recorded MPLC version |
+| **Runtime verified** | Behavior was tested in Mystic |
+| **Platform verified** | Behavior was confirmed on a named operating system and architecture |
+| **Version-specific** | Behavior is confirmed only for a named Mystic build |
+| **Needs testing** | The documented change has not yet been reproduced locally |
 
-## Primary Sources
+## Current Coverage
 
-- Mystic BBS Wiki history index: https://wiki.mysticbbs.com/doku.php?id=whats_new_intro
-- Mystic BBS Wiki: https://wiki.mysticbbs.com/
-- Mystic release archives and their included `WHATSNEW.TXT` files
-- Mystic source and historical material: https://github.com/fidosoft/mysticbbs
+- Mystic 1.05 through 1.09 document the early MPE/MPL engine and major BBS changes.
+- Mystic 1.10 documents the major modernization of MPL and the `.mpx` transition.
+- Mystic 1.11 documents advanced record handling and additional date and timing support.
+- Mystic 1.12 documents the long alpha cycle, embedded Python introduction, later Python 2/3 engine replacement, and continued MPL expansion.
 
-## Copyright and Attribution
-
-Do not copy complete upstream release notes into this repository. Summarize relevant information and link to the official source. Short excerpts should be used only when necessary to preserve an exact identifier, command, or diagnostic message.
+This folder is intended to grow as individual alpha-build changes are researched, tested, and incorporated into the appropriate version file.
