@@ -1,164 +1,266 @@
 # MPL and MPY Cross-Version Change Index
 
-This page summarizes the evolution of Mystic scripting across major releases. The version files contain the full software, MPL, and MPY explanations.
+This index summarizes major scripting-language and runtime changes across Mystic releases and links to the standalone detailed version histories in this repository.
 
-## Timeline
+## Detailed Histories
 
-| Mystic version | MPL and scripting significance |
-|---|---|
-| 1.05 | Early MPE compiler and runtime fixes; stronger undefined-variable detection; menu and keyboard behavior corrected for MPE execution |
-| 1.06 | Major language foundation: user procedures and functions, parameters, local variables, constants, additional built-ins, and improved MPE integration |
-| 1.07 | Expression and Boolean improvements, much faster executor, new file/message group access, text-editing access, cross-platform path support, screen-information access, and rewritten MPL tools and manual |
-| 1.08 | Continued MPL API growth, including user-time access and many Mystic integration additions |
-| 1.09 | Transitional modernization leading toward the major 1.10 language and runtime changes |
-| 1.10 | Major MPL redesign: Pascal-style language expansion, PEMDAS and parentheses, local declarations, nested and recursive routines, `Var` parameters, block comments, multidimensional arrays, new loop control, renamed built-ins, and `.mpx` compiled files |
-| 1.11 | Advanced record support, records returned from functions, nested records and arrays, and additional date and timing capabilities |
-| 1.12 | Long alpha cycle with major MPL expansion and embedded Python (`.mpy`) introduction; later Python 2/3 engine replacement and continued scripting API development |
+### Mystic 1.10
 
-## Compiled MPL Extension
+- [Version overview](Mystic-1.10.md)
+- [Alpha 1–21](1.10/Alpha-01-21.md)
+- [Alpha 22–32](1.10/Alpha-22-32.md)
+- [Alpha 33–43](1.10/Alpha-33-43.md)
+- [Alpha 44–63 and final release](1.10/Alpha-44-63-and-release.md)
 
-### Before Mystic 1.10
+### Mystic 1.11
 
-Compiled Mystic programs commonly used the `.mpe` extension and the runtime was frequently described as the MPE engine.
-
-### Mystic 1.10 and Later
-
-The compiled extension changed to `.mpx`. Current documentation should use:
-
-```text
-source.mps -> program.mpx
-```
-
-Older `.mpe` terminology should be retained only when describing historical releases.
-
-## MPL Language Development
-
-### Procedures and Functions
-
-Mystic 1.06 established much of the reusable-routine model, including declared procedures, functions, parameters, local variables, and constants.
-
-Mystic 1.07 improved what those routines could do inside expressions and added Boolean parameter support.
-
-Mystic 1.10 expanded routine behavior with nested definitions, recursion, `Var` reference parameters, and the ability to call a function while intentionally discarding its result.
-
-Mystic 1.11 added records as function result types.
-
-### Expressions and Operators
-
-Early MPL behavior was more limited and did not consistently implement normal mathematical precedence.
-
-Mystic 1.07 improved expression evaluation, including declared functions and Boolean modifiers.
-
-Mystic 1.10 introduced standard precedence behavior, parentheses, exponent support, and broader bitwise operations. Documentation that says MPL always evaluates strictly left-to-right applies only to older engines.
-
-### Variables, Arrays, and Records
-
-Mystic 1.06 added or completed local variables and constants.
-
-Mystic 1.10 added local declarations inside more blocks, declaration initialization, multidimensional arrays, and Pascal-style reference parameters.
-
-Mystic 1.11 expanded record composition and allowed records to be returned by functions.
-
-Mystic 1.12 continued extending record, array, and BBS-data interfaces throughout its alpha builds.
-
-### Control Flow
-
-Modern MPL uses Pascal-style control flow:
-
-```pascal
-If Condition Then
-Begin
-  Statement;
-End;
-```
-
-Mystic 1.10 replaced several older control-flow forms and added or standardized features such as `Case`, `Break`, and `Continue`.
-
-Pages describing `EndIf`, `FEnd`, `WEnd`, or a single `ElseIf` keyword should identify those forms as historical.
-
-## MPL Runtime and Integration
-
-MPL evolved from an early embedded MPE execution environment into a broader Mystic integration language capable of:
-
-- Executing menu commands
-- Reading and writing user, message-base, file-base, and group records
-- Accessing screen and prompt information
-- Working with text editors and message text
-- Running from menus, command lines, and SysOp macros
-- Handling platform-specific paths
-- Reporting more detailed execution and compiler errors
-
-Each version file identifies the specific interfaces added or changed.
-
-## Renamed and Removed MPL Identifiers
-
-Mystic 1.10 renamed several older built-ins to clearer names. Examples include:
-
-| Older name | Newer name |
-|---|---|
-| `fExist` | `FileExist` |
-| `fErase` | `FileErase` |
-| `fCopy` | `FileCopy` |
-| `CLS` | `ClrScr` |
-
-Some older helper functions were removed because their result became part of another function. One example is the older `IsNoFile` pattern after `DispFile` gained a Boolean result.
-
-Migration work should search source code for historical identifiers before recompilation.
-
-## MPY and Embedded Python
-
-### Before Mystic 1.12
-
-Embedded Python and `.mpy` scripts were not part of Mystic 1.05 through 1.11. Any Python integration in those environments was external rather than the later built-in MPY runtime.
+- [Complete Alpha 1–6 history](Mystic-1.11.md)
 
 ### Mystic 1.12
 
-Mystic 1.12 introduced an embedded Python scripting system using `.mpy` files.
+- [Version overview](Mystic-1.12.md)
+- [Alpha 1–12](1.12/Alpha-01-12.md)
+- [Alpha 13–24](1.12/Alpha-13-24.md)
+- [Alpha 25–36](1.12/Alpha-25-36.md)
+- [Alpha 37–42](1.12/Alpha-37-42.md)
+- [Alpha 43–48](1.12/Alpha-43-48.md)
 
-The first implementation was based on Python 2.7 and exposed Mystic data and operations through built-in Python functions and dictionaries.
+## MPL Language Timeline
 
-Later 1.12 alpha development replaced the original engine with a new implementation that could load Python 2 or Python 3, depending on the installed library and execution method. Python 3 execution paths and compatibility work were added during this period.
+### Mystic 1.05
 
-Because 1.12 spans many alpha builds, MPY documentation must record the exact alpha version tested.
+- Early MPE execution and compiler stability
+- Script execution and error handling still limited compared with later releases
+- No MPY support
 
-## Python 2 and Python 3 Compatibility
+### Mystic 1.06
 
-Python 2 and Python 3 differ in areas including:
+- Procedures, parameters, local variables, constants, and functions established as important MPL building blocks
+- Compiler and runtime behavior became more structured
+- No MPY support
 
-- `print` statement versus `print()`
-- Text and byte handling
-- Integer-division behavior
-- Module names
-- Dictionary iteration behavior
-- C-extension and shared-library compatibility
+### Mystic 1.07
 
-An MPY script written for the first Python 2.7 engine should not be assumed to run unchanged under a later Python 3 execution path.
+- Expression handling and Boolean processing improved
+- Runtime performance increased
+- Additional record and BBS integration became available
+- No MPY support
 
-## Required Documentation Review by Topic
+### Mystic 1.08 and 1.09
 
-| Topic | Versions most likely to affect it |
+- Continued MPE/MPL stabilization
+- More built-ins and BBS integration
+- Transition toward the large 1.10 redesign
+- No MPY support
+
+### Mystic 1.10
+
+Mystic 1.10 is the primary modern MPL migration boundary.
+
+#### Syntax
+
+- Pascal-style `Then`, `Do`, and `Begin`/`End`
+- `Else If` replaces historical single-token forms
+- Modern `For`, `While`, and `Repeat` structures
+- Line and block comments
+- Include-file changes
+- Optional alternate C-like syntax
+
+#### Expressions and types
+
+- Standard operator precedence
+- Parentheses
+- Negative numbers
+- `Real`
+- `%` modulus and `^` power
+- Sized strings
+- Numeric character values
+- String indexing
+
+#### Scope and routines
+
+- Local declarations
+- Declaration initialization
+- Nested procedures and functions
+- Recursive procedures
+- `Var` reference parameters
+- Longer identifiers
+- Higher compiler variable limits
+
+#### Collections and records
+
+- Multidimensional arrays
+- Expanded record use
+- Broader file and record handling
+
+#### Control flow
+
+- `Case`
+- `Break`
+- `Continue`
+
+#### Compiler and output
+
+- `.mpe` compiled output becomes `.mpx`
+- MIDE and MPLC improvements
+- Faster compiler and runtime behavior
+- Improved execution-error visibility
+
+#### Built-ins and integration
+
+- Many renamed file, screen, user, and file-base identifiers
+- New string, word, path, environment, date, timer, screen, output, and bit functions
+- Program name and parameter variables
+- Login and new-user integration
+- Message and mail statistics
+- MPL user-interface classes
+
+### Mystic 1.11
+
+- Records passed to procedures by value
+- Records passed through `Var`
+- Records returned from functions
+- Multidimensional arrays inside records corrected
+- `TimerMS`
+- Four-digit date-format expansion
+- Improved ANSI-message and editor behavior
+- No MPY support
+
+### Mystic 1.12
+
+#### MPL file and compiler changes
+
+- New buffered, record-size-aware file API
+- MPX programs loaded fully into memory
+- Larger compiled programs with a documented limit during part of the alpha cycle
+- Improved nested arrays and records
+- `Library` source handling
+- Bulk and recursive MPLC options
+- Error summaries and standard-I/O compiler output
+- Better include lookup
+
+#### MPL runtime and integration
+
+- Unix-date conversions
+- Expanded user and caller statistics
+- User-record migration to Unix and Julian date fields
+- IPv6-capable user data
+- Password-policy and password-storage functions
+- Theme and fallback variables
+- Terminal-size variables
+- Masked input changes
+- Semaphore-path and ACS-result variables
+- `fWriteStr`
+- `after_login.mpx` and `before_menus.mpx`
+
+## MPY and Embedded Python Timeline
+
+### Before Mystic 1.12
+
+Embedded Python and `.mpy` scripts were not available.
+
+### Mystic 1.12 Alpha 1
+
+- Embedded Python 2.7 engine introduced
+- `.mpy` source extension
+- Menu execution
+- Theme-script lookup
+
+### Early 1.12 alphas
+
+- Prompt execution
+- `getuser`
+- `onekey`
+- `keypressed`
+- Script-parameter functions
+
+### Middle 1.12 alphas
+
+Python gained broader Mystic APIs:
+
+- User dictionaries and ID lookup
+- Configuration dictionaries
+- Message-group and message-base dictionaries
+- File-group and file-base dictionaries
+- Prompt and prompt-information access
+- Screen position, color, raw output, and cursor control
+- ACS evaluation
+- Node logging
+- User-profile updates
+- Keyboard stuffing
+- File-list APIs
+
+### Mystic 1.12 Alpha 37
+
+Python became capable of implementing message applications through:
+
+- `msg_open`
+- `msg_seek`
+- `msg_found`
+- `msg_next`
+- `msg_prev`
+- `msg_gethdr`
+- `msg_gettxt`
+- `msg_close`
+
+A default `msgread.mpy` demonstrated the message-reader lifecycle.
+
+### Mystic 1.12 Alpha 39–45
+
+- User dictionaries changed with the new record format
+- Unix timestamps, Julian dates, IPv6, country, and statistics fields expanded
+- Theme-fallback configuration fields added
+- Terminal-size function added
+- File-list and display integration expanded
+
+### Mystic 1.12 Alpha 46
+
+The original Python engine was replaced by one capable of loading Python 2 or Python 3.
+
+Python 3 execution paths included:
+
+- `GZ` menu command
+- `-Z` command-line option
+- Mystic-DOS `PYTHON3`
+- `~` prompt execution
+
+Python libraries must match Mystic's operating system, architecture, bitness, and selected Python major version.
+
+### Mystic 1.12 Alpha 48
+
+- Display and configuration discovery functions
+- Expanded user and caller statistics
+- More robust Python initialization
+- Final documented Alpha 48 integration work
+
+## Breaking and Migration-Sensitive Changes
+
+| Release/build | Migration concern |
 |---|---|
-| Syntax and program structure | 1.06, 1.07, 1.10 |
-| Variables and constants | 1.06, 1.07, 1.10 |
-| Procedures and functions | 1.06, 1.07, 1.10, 1.11 |
-| Conditional logic and loops | 1.10 |
-| Arrays and records | 1.10, 1.11, 1.12 |
-| File and path handling | 1.07, 1.10, 1.12 |
-| Mystic record access | 1.07 through 1.12 |
-| Compiler and execution behavior | Every version |
-| MPY/Python | 1.12 only |
+| Mystic 1.10 | Modern parser, expression evaluation, renamed built-ins, file I/O, and `.mpx` output |
+| Mystic 1.11 | Record parameters, record returns, arrays inside records, ANSI messages |
+| 1.12 Alpha 17–18 | File indexes, MPX memory loading, libraries, compiler behavior |
+| 1.12 Alpha 35 | Startup MPL login/new-user variables and required recompilation |
+| 1.12 Alpha 39–40 | User-record and password-engine migration |
+| 1.12 Alpha 44 | Complete theme-system replacement |
+| 1.12 Alpha 45 | Terminal-size, masked-input, and display-file changes |
+| 1.12 Alpha 46 | Replacement Python engine and Python 3 support |
+| 1.12 Alpha 48 | Automatic login hooks and expanded service integration |
 
-## Migration Checklist
+## Documentation Rule
 
-When upgrading an MPL or MPY installation:
+Every syntax, built-in, record field, or MPY function documented in the wiki should state the earliest confirmed Mystic version or alpha build when that information is known.
 
-1. Identify the source version and target Mystic build.
-2. Preserve original `.mps`, include, and `.mpy` source files.
-3. Search for renamed or removed functions and procedures.
-4. Review syntax changes, especially when moving to or beyond 1.10.
-5. Recompile all MPL source with the target MPLC.
-6. Test record-writing operations with backup data.
-7. Confirm path handling on the target operating system.
-8. For MPY, record whether the script runs under Python 2 or Python 3.
-9. Test scripts from the same menu, command line, or event context used in production.
-10. Update the applicable version file with the verified result.
+Use a verification block such as:
+
+```text
+Mystic version/build:
+MPLC version:
+Python major version:
+Operating system:
+Architecture and bitness:
+Compiler result:
+Runtime result:
+Date tested:
+Notes:
+```
