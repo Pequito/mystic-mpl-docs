@@ -1,37 +1,80 @@
 # Mystic 1.08 Changes
 
-Status: **Source indexed**
+Status: **Documented — needs local verification**
 
-## Scope
+## Release Summary
 
-This file tracks Mystic 1.08 changes that may affect MPL programs, compiler behavior, runtime variables, records, functions, procedures, or documentation.
+Mystic 1.08 resumed public development after the 1.07 series and focused on modern Internet-facing BBS operation, server security, message-network reliability, configuration improvements, and continued expansion of MPL access to Mystic runtime information.
 
-## MPL-Relevant Changes
+## Mystic Software Changes
 
-Detailed extraction has not yet been completed.
+### Telnet Security
 
-## Documentation Review Targets
+Mystic's Telnet server gained IP blocking through an `IPBLOCK.TXT` file in the data directory. Entries could block exact addresses or address masks. This gave SysOps a native way to reject known abusive hosts before login.
 
-- MPL syntax and compiler behavior
-- Built-in functions and procedures
-- File and message-base APIs
-- User and configuration records
-- Compatibility differences from surrounding releases
+### Message Handling
 
-## Verification Tasks
+Message-reader and network-message defects were corrected, including filtering of kludge lines and creation of reply identifiers. These fixes improved compatibility for networked message bases.
 
-- [ ] Review the official Mystic 1.08 changes page
-- [ ] Review the release archive `WHATSNEW.TXT`
-- [ ] Extract MPL-specific additions, fixes, and removals
-- [ ] Add entries to `MPL-Change-Index.md`
-- [ ] Identify affected wiki pages
-- [ ] Record compiler and runtime tests when available
+### Configuration Reliability
 
-## Sources
+MCFG defects involving menu editing and clipboard-style operations were corrected. The release also continued improving platform and server behavior accumulated during the long development interval after 1.07.
 
-- Official changes page: https://wiki.mysticbbs.com/doku.php?id=whats_new_108
-- History index: https://wiki.mysticbbs.com/doku.php?id=whats_new_intro
+## MPL Changes
 
-## Notes
+### User-Time Access
 
-Summarize relevant upstream entries rather than copying the full release notes.
+A new `GetUserTime` function returned the number of minutes remaining for the current user. This allowed scripts to make decisions based on the user's active time allowance.
+
+Example use:
+
+```pascal
+If GetUserTime < 5 Then
+  WriteLn('Less than five minutes remain.');
+```
+
+The exact return type and behavior should be verified with the target 1.08 compiler.
+
+### Integration Direction
+
+MPL continued moving toward direct access to Mystic runtime state rather than requiring scripts to reproduce internal calculations. Scripts could increasingly rely on built-in functions for current session information.
+
+## MPY and Python Changes
+
+**MPY was not available in Mystic 1.08.**
+
+The embedded Python engine and `.mpy` format were introduced later during Mystic 1.12 development.
+
+## Compatibility Impact
+
+- Telnet deployments may begin using `IPBLOCK.TXT`; document its path and matching rules locally.
+- Scripts that estimate remaining user time should migrate to `GetUserTime` after verifying its units and return type.
+- Network-message behavior may differ after reply and kludge-line fixes.
+
+## Upgrade Actions
+
+1. Back up server and message-base configuration.
+2. Create and test `IPBLOCK.TXT` only after defining a recovery path for accidental blocks.
+3. Recompile MPL source with the 1.08 compiler.
+4. Test `GetUserTime` near time-limit boundaries.
+5. Validate network-message imports, reply linking, and reader display.
+
+## Documentation Impact
+
+- `wiki/Functions.md`
+- `wiki/User-Data.md`
+- `wiki/Menu-Integration.md`
+- `wiki/Version-Compatibility.md`
+
+## Verification Record
+
+```text
+Mystic version/build: 1.08
+Operating system:
+MPLC version:
+GetUserTime result type:
+GetUserTime boundary test:
+IP block test:
+Network message test:
+Notes:
+```
