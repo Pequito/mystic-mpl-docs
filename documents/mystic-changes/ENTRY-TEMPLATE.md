@@ -1,81 +1,107 @@
 # Mystic <Version> Changes
 
-Status: **Source indexed**
+Status: **Documented / Needs testing**
 
-## Release Scope
+## Release Summary
 
-```text
-Mystic version:
-Alpha or build:
-Release date:
-Platforms:
-Source reviewed:
-Date reviewed:
-Reviewed by:
-```
+Explain the purpose and overall direction of this Mystic release in original language. Include release or alpha-build dates when known.
 
-## MPL Language Changes
-
-| Type | Change | MPL impact | Verification |
-|---|---|---|---|
-| `+`, `!`, or `-` | Summary | Affected syntax or behavior | Status |
-
-## Compiler Changes
-
-| Type | Change | Documentation impact | Verification |
-|---|---|---|---|
-| | | | |
-
-## Built-In Functions and Procedures
+## Mystic Software Changes
 
 ### Added
 
-| Name | Kind | Purpose | Related page |
-|---|---|---|---|
-| | | | |
+- Describe new BBS, server, editor, menu, message, file, protocol, configuration, or utility features.
+- Explain how a SysOp would use each important feature.
 
-### Changed or Renamed
+### Changed
 
-| Previous name | Current name | Change | Compatibility impact |
-|---|---|---|---|
-| | | | |
+- Describe altered defaults, workflows, file formats, paths, menu behavior, prompts, record layouts, or platform support.
+
+### Fixed
+
+- Summarize defects whose correction materially changes operation or compatibility.
 
 ### Removed
 
-| Name | Replacement | Compatibility impact |
-|---|---|---|
-| | | |
+- Identify removed commands, protocols, programs, settings, or compatibility paths.
 
-## Records and Runtime Variables
+## MPL Changes
 
-| Record or variable | Change | MPL impact |
-|---|---|---|
-| | | |
+### Language and Compiler
 
-## Compatibility Notes
+- New syntax
+- Changed syntax
+- Compiler validation changes
+- Expression and type-system changes
+- Source or compiled extension changes
 
-- None recorded yet.
+### Runtime
 
-## Documentation Pages Affected
+- Execution-engine changes
+- Performance changes
+- Error handling
+- Menu and command-line execution changes
 
-- None recorded yet.
+### Functions, Procedures, and Variables
 
-## Verification Tasks
+| Name | Type | Change | Developer impact |
+|---|---|---|---|
+| `<identifier>` | Function, procedure, or variable | Added, changed, renamed, or removed | Explain required source change |
 
-- [ ] Confirm source version and build
-- [ ] Extract MPL-relevant changes
-- [ ] Update the MPL cross-version index
-- [ ] Compile affected syntax
-- [ ] Run affected examples in Mystic
-- [ ] Update related wiki pages
-- [ ] Record version-specific behavior
+### MPL Compatibility Impact
 
-## Sources
+Explain whether existing source must be edited or only recompiled.
 
-- Official Mystic changes page:
-- Included `WHATSNEW.TXT`:
-- Additional source:
+## MPY and Python Changes
 
-## Notes
+State one of the following clearly:
 
-Add interpretation notes here. Clearly distinguish upstream facts from project conclusions or test results.
+- **MPY was not available in this release.**
+- **MPY was introduced or changed in this release.**
+
+When MPY exists, document:
+
+- Python engine version
+- `.mpy` execution methods
+- New or changed Mystic Python functions
+- Dictionary or record changes
+- Python 2 versus Python 3 behavior
+- Required script migration
+- Platform-specific behavior
+
+## Upgrade and Migration Actions
+
+1. Back up the Mystic installation and script source.
+2. Identify configuration or record changes.
+3. Update renamed or removed MPL and MPY identifiers.
+4. Recompile affected `.mps` source with the target MPLC.
+5. Test `.mpx` and `.mpy` scripts inside Mystic.
+6. Validate menu, message, file, and server behavior affected by the release.
+
+## Documentation Impact
+
+List pages in this repository that should be reviewed or updated.
+
+- `wiki/<Page>.md`
+- `documents/mystic-changes/MPL-Change-Index.md`
+
+## Verification Record
+
+```text
+Mystic version/build:
+Operating system:
+Architecture:
+MPLC version:
+Python engine:
+Date tested:
+Tested by:
+MPL compile result:
+MPL runtime result:
+MPY runtime result:
+Software feature result:
+Notes:
+```
+
+## Known Uncertainties
+
+List behavior that remains untested, platform-specific, or inconsistent among alpha builds.
