@@ -1,262 +1,374 @@
 # Mystic 1.12 Changes
 
-Status: **Documented overview — alpha-build verification required**
+Status: **Expanded into detailed Alpha 1 through Alpha 48 documentation**
 
-## Release Summary
+Mystic 1.12 had a long alpha cycle spanning forty-eight documented builds. The release line introduced embedded Python, later replaced the original Python engine with a Python 2 and Python 3 capable implementation, expanded MPL file and record handling, changed the user and password databases, replaced the theme system, and delivered major server, network, security, terminal, message, file, and automation changes.
 
-Mystic 1.12 has a long alpha-development history and includes extensive changes to Mystic itself, MPL, and the introduction of embedded Python through `.mpy` scripts.
+Because the full history is too large for one useful page, the detailed alpha entries are divided into chronological ranges.
 
-Because features were added, replaced, and revised across many alpha builds, documentation must always record the exact 1.12 alpha version being tested.
+## Detailed Alpha History
 
-## Mystic Software Changes
+- [Alpha 1 through Alpha 12](1.12/Alpha-01-12.md) — initial Python 2.7 engine, `.mpy` execution, menu IDs, ANSI messages, user flags, file indexes, code pages, paths, and transfer changes
+- [Alpha 13 through Alpha 24](1.12/Alpha-13-24.md) — socket reliability, Python input, MPX memory loading, MPLC improvements, library handling, MPL file I/O, uploads, passive FTP, QWK polling, spell checking, and 64-bit macOS
+- [Alpha 25 through Alpha 36](1.12/Alpha-25-36.md) — echomail and QWK correctness, socket-engine migration, MIS2, IPv6, SSL certificates, file hatching, startup MPL, errors, NodeSpy, Python parameters, FTP, NNTP, and security events
+- [Alpha 37 through Alpha 42](1.12/Alpha-37-42.md) — major Python dictionaries and message APIs, Unix dates, user-record conversion, password hashing, MPL password functions, SSH, BinkP queue and IPv6 improvements
+- [Alpha 43 through Alpha 48](1.12/Alpha-43-48.md) — netmail encryption, new theme architecture, terminal-size APIs, masked input, unlimited display variants, replacement Python 2/3 engine, secure BinkP, login hooks, and final alpha expansion
 
-Mystic 1.12 continued broad development across:
+A directory-level overview is available at [Mystic 1.12 Detailed Change History](1.12/README.md).
 
-- Telnet, SSH, and other server services
-- Message networking and message-base processing
-- File bases, archive handling, and file utilities
-- Configuration and maintenance tools
-- Menu commands and event execution
-- User records and security
-- ANSI, terminal, and screen handling
-- Linux, Windows, macOS, and architecture support
-- Command-line execution and automation
+## Major Mystic Software Changes
 
-Individual build changes should be added under dated alpha-build headings as they are verified.
+Mystic 1.12 changed nearly every major subsystem during its alpha cycle.
 
-## MPL Changes
+### Servers and networking
 
-### Continued Language Expansion
+- New and revised MIS/MIS2 server implementations
+- BinkP, direct SSL BinkP, FTP, anonymous FTP, NNTP, NNTPS, SMTP, POP3, telnet, rlogin, SSH, and IPv6 work
+- New socket engine
+- More complete logging, auto-ban, country blocking, whitelisting, and IP-block events
+- Concurrent outbound MIS polling intended to replace FIDOPOLL
+- More accurate transfer queues, timeouts, busy files, and connection cleanup
 
-The 1.12 development cycle continued improving modern MPL syntax, type handling, arrays, records, runtime interfaces, compiler diagnostics, and BBS-data access.
+### Message networks
 
-Complex features should be tested against the exact alpha build because a construct accepted by one compiler may behave differently in another.
+- QWK and QWKE fixes and performance work
+- QWK networking and QWKPOLL changes
+- Echomail and netmail routing corrections
+- Point-system and 5D address corrections
+- Unified `MSGID` generation
+- Consistent `TZUTC`
+- Better `SEEN-BY`, `PATH`, tear, origin, and `@VIA` generation
+- AreaFix and FileFix expansion
+- File-echo hatching and EchoNodeTracker automation
+- Optional AES-256 encrypted netmail through compatible Cryptlib configuration
 
-### Command-Line Execution
+### Messages and editors
 
-Mystic supports command-line execution of MPL programs with the `-X` option. During 1.12 development, argument handling and related execution behavior were adjusted.
+- ANSI message uploading, storage, quoting, and subject handling
+- Spell checking and multiple dictionaries
+- Improved large-message and large-message-base performance
+- Draft, tagline, quote, prompt, and editor changes
+- New template-based index reader
+- Large terminal and ANSI editor support
 
-Automation should test:
+### Files
 
-- Script path resolution
-- Parameter forwarding
-- Exit status
-- Working directory
-- Error output
-- Behavior when the script is outside the default script directory
+- New file indexes and duplicate indexes
+- Case-aware and case-insensitive network behavior
+- `FILE_ID.ANS` support
+- File hatching and fileboxes
+- Improved archive handling
+- More capable file lists and Python file-list APIs
+- SAUCE-aware display and description handling
 
-### Records, Arrays, and Data Access
+### Users and security
 
-MPL interfaces for Mystic records continued to evolve. Scripts that read or write users, message bases, file bases, groups, configuration, or other BBS data should be considered version-sensitive.
+- Never-delete and force-password-change flags
+- Larger IPv6 and host fields
+- Unix and Julian date storage
+- Expanded voting and call statistics
+- Separate QWK and REP paths
+- New password engine with cleartext and PBKDF2-SHA512 modes
+- Locked-account enforcement across more services
+- Automatic whitelisting policies
 
-Before deploying a record-writing script:
+### Themes and menus
 
-1. Back up the affected data.
-2. Confirm the record was loaded successfully.
-3. Modify only intended fields.
-4. Save with the correct procedure.
-5. Read the record again and verify the result.
+- Unique menu IDs
+- Larger menus and command counts
+- New Theme editor access
+- Complete replacement of the old theme database and path model
+- Prompt, text, menu, and script inheritance
+- Dynamic theme discovery
+- Unlimited prompt length
+- Wide-terminal layout and menu margins
+- New display-file variants and terminal-size lookup
 
-### Compiler and Runtime Corrections
+## Major MPL Changes
 
-The 1.12 alpha cycle includes many fixes where the compiler accepted invalid source, rejected valid source, or the runtime handled a valid construct incorrectly.
+### File I/O
 
-For that reason, a wiki example should not be marked verified merely because it compiles with one 1.12 alpha build.
+Mystic 1.12 introduced a newer buffered and record-size-aware MPL file API using a function family such as:
 
-## Embedded Python and MPY
-
-### MPY Introduction
-
-Mystic 1.12 introduced embedded Python scripting. Python source files use the `.mpy` extension and execute inside Mystic with access to Mystic-provided functions and data dictionaries.
-
-MPY scripts can be used for many of the same integration tasks as MPL, including:
-
-- Terminal input and output
-- User and session information
-- Menu integration
-- Message and file data access
-- Configuration access
-- File-system operations
-- Script parameters
-
-### Original Python 2.7 Engine
-
-The first embedded Python implementation used Python 2.7. Scripts written for this engine use Python 2 syntax and behavior.
-
-Typical Python 2 assumptions include:
-
-```python
-print 'Hello from Mystic'
+```text
+FileOpen
+FileEOF
+FileRead
+FileSeek
+FilePos
+FileSize
+FileWrite
+FileReadBlock
+FileWriteBlock
+FileClose
 ```
 
-Python 2 text, byte, integer-division, dictionary, and module behavior differs from Python 3.
+The exact signatures must be recorded against the target MPLC build.
 
-### Later Python 2 and Python 3 Engine
+### MPX runtime and compiler
 
-Later 1.12 alpha development replaced the original Python engine with a newer implementation capable of loading Python 2 or Python 3, depending on the installed shared library and the Mystic execution method.
+- MPX programs loaded fully into memory for faster execution.
+- Compiled-program capacity expanded, with a 128 KB limit documented during part of the cycle.
+- Arrays and records inside records became more reliable.
+- Include lookup improved.
+- `Library` source could be skipped during standalone bulk compilation.
+- MPLC bulk and recursive options expanded.
+- Error summaries improved.
+- MPLC wrote to standard I/O for third-party editor integration.
+- Empty source files were skipped.
+- Recursive `-ALL` scanning was corrected.
 
-This introduced Python 3 execution paths and made the runtime version an essential part of MPY documentation.
+### Date and user integration
 
-Python 3 syntax uses:
+MPL gained Unix-date functions:
 
-```python
-print('Hello from Mystic')
+```text
+DateUnix
+DateU2D
+DateD2U
 ```
 
-An MPY script written for the original Python 2.7 engine should not be assumed to run unchanged with Python 3.
+User variables changed with the new record format, including Unix timestamps, Julian dates, IPv6-capable fields, country, password metadata, and expanded statistics.
 
-### MPY Compatibility Areas
+### Password integration
 
-Review these areas during Python 2 to Python 3 migration:
+MPL gained supported password interfaces:
 
-- `print` syntax
-- `str` versus `bytes`
-- Integer division
-- Unicode handling
-- Dictionary keys and iteration
-- Exception syntax
-- Renamed standard-library modules
-- Shared-library naming and loading
-- Mystic function return types
-- Mystic dictionary value types
+```pascal
+Function CheckPW(PW : String) : Boolean;
+Procedure SetPW(PW : String);
+Function ValidPW(PW : String) : Byte;
+```
 
-### Mystic Python Functions and Dictionaries
+These replace unsafe direct password-field comparison or assignment.
 
-Mystic exposes its own Python API rather than requiring scripts to communicate with Mystic through external files alone.
+### Themes and terminal state
 
-The API includes categories such as:
+New variables included concepts such as:
 
-- Display and terminal functions
-- Keyboard and input functions
-- File and directory functions
-- User data functions
-- Message-base functions
-- File-base functions
-- Configuration functions
-- Menu and session functions
+```text
+CfgDefTheme
+CfgTextFB
+CfgScriptFB
+CfgFallback
+TermSizeX
+TermSizeY
+CfgSemaPath
+AcsOKFlag
+```
 
-Mystic also exposes structured BBS information through dictionaries. Dictionary names, keys, value types, and write behavior can change among alpha builds, so each reference page must identify the tested build.
+### Input and files
 
-### MPY Execution Context
+- `InputOptions` gained a custom password echo character.
+- The Input class gained masked-input mode 4.
+- `fWriteStr` wrote text without appending a newline.
+- Login scripts could execute automatically through `after_login.mpx` and `before_menus.mpx`.
 
-An MPY script may behave differently depending on where it is launched:
+## Major MPY and Python Changes
 
-- Interactive menu command
-- Login or logoff event
-- Command line
-- Server or node context
-- Background or maintenance process
+### Initial engine
 
-Test the script using the same execution path intended for production.
+The first 1.12 alphas introduced an embedded Python 2.7 engine and `.mpy` scripts.
 
-## MPL and MPY Comparison
+Python could run from:
 
-| Area | MPL | MPY |
-|---|---|---|
-| Source extension | `.mps` | `.mpy` |
-| Compiled output | `.mpx` | Normally interpreted by embedded Python |
-| Language style | Pascal-influenced | Python 2 or Python 3, depending on engine |
-| Compiler required | Yes, MPLC | No MPL compilation step |
-| Mystic integration | Built-in functions, procedures, and variables | Built-in Python functions and dictionaries |
-| Version sensitivity | Compiler and runtime build | Mystic build and Python runtime version |
+- Menus
+- Prompt replacements
+- Command-line or shell contexts added during development
+- Default example scripts
 
-Neither language is automatically superior. MPL is tightly integrated and deploys as compiled `.mpx`; MPY offers Python syntax and libraries but requires careful runtime-version management.
+### Early API
 
-## Compatibility Impact
+The initial API added capabilities such as:
 
-Mystic 1.12 is highly version-sensitive because it spans many alpha releases.
+```text
+getuser
+onekey
+keypressed
+param_count
+param_str
+```
 
-Record all of the following for an MPY test:
+### Record dictionaries
+
+Python gained dictionaries and lookup functions for:
+
+- Users
+- Configuration
+- Message groups
+- Message bases
+- File groups
+- File bases
+
+Record-number and unique-ID lookup were distinct and should not be confused.
+
+### Terminal and Mystic integration
+
+Python gained functions for:
+
+- Mystic output and raw output
+- Cursor position and color
+- Keyboard stuffing and key checks
+- Prompt retrieval and prompt-information values
+- ACS checks
+- Node logging
+- User profile updates
+- Terminal-size detection
+- Display-file lookup
+- Configuration-file lookup
+
+### Message API
+
+Python gained message-base functions including:
+
+```text
+msg_open
+msg_seek
+msg_found
+msg_next
+msg_prev
+msg_gethdr
+msg_gettxt
+msg_close
+```
+
+Later additions expanded statistics and last-read handling.
+
+### File-list API
+
+Python gained file-list functions built around an opened file-list handle, demonstrated through a distributed `filelist.mpy` example.
+
+### Replacement engine and Python 3
+
+Alpha 46 replaced the original Python engine with one capable of loading Python 2 or Python 3.
+
+Separate Python 3 execution paths included:
+
+- Menu command `GZ`
+- Command-line option `-Z`
+- Mystic-DOS `PYTHON3`
+- Prompt execution using `~`
+
+Python 2 and Python 3 source must be treated as separate compatibility targets unless deliberately written and tested for both.
+
+## Critical Migration Boundaries
+
+### Alpha 1
+
+Embedded Python first appears. Python 2.7 library architecture must match Mystic.
+
+### Alpha 17–18
+
+File duplicate indexes, MPX memory loading, compiler behavior, libraries, and compiled-size constraints change.
+
+### Alpha 28–36
+
+The socket engine and MIS2 infrastructure change. IPv6, server configuration, logging, events, and polling behavior require extensive retesting.
+
+### Alpha 35
+
+Startup MPL gains enough control to replace login and new-user selection. MPL recompilation is required because runtime variables changed.
+
+### Alpha 37
+
+Python becomes a practical application language through message, user, group, base, prompt, screen, access, and logging APIs.
+
+### Alpha 39–40
+
+User records and password storage change. Direct record readers and direct password-field handling become unsafe and incompatible.
+
+### Alpha 44
+
+The theme directory and inheritance model replaces the old theme database and separate global path model.
+
+### Alpha 45
+
+Terminal sizes, masked input, and display-file lookup change. MPL recompilation and theme asset migration are required.
+
+### Alpha 46
+
+The Python engine is replaced and Python 3 support is added. Scripts and native libraries must be matched to the selected major version and architecture.
+
+### Alpha 48
+
+Automatic login hooks, display discovery, expanded statistics, and final server and message-ID behavior become available.
+
+## MPY Deployment Requirements
+
+A production MPY deployment should document:
 
 ```text
 Mystic alpha build:
-Operating system:
-Architecture:
 Python major version:
 Python library version:
-Library path:
-MPY execution method:
+Python library path:
+Mystic architecture and bitness:
+Operating system:
+Script location:
+Theme and fallback path:
+Menu or prompt execution method:
+Required user access:
+Required external modules:
+Failure and logging behavior:
 ```
-
-For MPL, record the exact MPLC build and recompile whenever Mystic is upgraded.
 
 ## Upgrade Actions
 
-1. Back up the complete Mystic installation and script source.
-2. Record the current and target alpha builds.
-3. Recompile all MPL source with the target MPLC.
-4. Test record-reading and record-writing MPL programs.
-5. Identify whether each MPY script targets Python 2 or Python 3.
-6. Confirm that Mystic loads the intended Python shared library.
-7. Test text, bytes, dictionaries, exceptions, and division behavior.
-8. Test scripts from their production menu or event context.
-9. Do not remove the previous working build until both MPL and MPY tests pass.
-
-## Documentation Impact
-
-- `wiki/MPL-Syntax.md`
-- `wiki/Variables.md`
-- `wiki/Procedures.md`
-- `wiki/Functions.md`
-- `wiki/Compiler-Usage.md`
-- Future `wiki/Embedded-Python.md`
-- Future `wiki/MPY-Getting-Started.md`
-- Future `wiki/MPY-Functions.md`
-- Future `wiki/MPY-Dictionaries.md`
-- `wiki/Version-Compatibility.md`
-
-## Recommended Alpha-Build Entry Format
-
-```markdown
-## Mystic 1.12 Axx
-
-### Mystic Software
-
-- Explain software changes.
-
-### MPL
-
-- Explain compiler, language, or runtime changes.
-
-### MPY
-
-- Explain Python engine, function, dictionary, or execution changes.
-
-### Compatibility
-
-- Explain required migration and testing.
-```
+1. Back up the complete BBS and all scripts before crossing alpha boundaries.
+2. Read every detailed range file between the source and destination builds.
+3. Run supplied upgrade utilities for data and theme changes.
+4. Pack or rebuild message and file bases when the documented alpha requires it.
+5. Recompile every MPL program after runtime-variable, record, Input, or compiler changes.
+6. Match Python libraries to Python major version, operating system, architecture, and bitness.
+7. Test every MPY script under the actual execution path used in production.
+8. Stop reading raw user, message, file, or configuration records with older layouts.
+9. Migrate password handling to official functions.
+10. Convert old theme paths and random-display filenames.
+11. Test IPv4 and IPv6 separately.
+12. Test FTP, BinkP, SSL BinkP, NNTP/NNTPS, SSH, SMTP, POP3, QWK, QWKPOLL, and transfer protocols used locally.
+13. Review all event, semaphore, auto-ban, country-block, whitelist, and firewall automation.
+14. Test login hooks with a recovery account and a bypass plan.
+15. Verify custom prompts and templates against the new defaults.
+16. Record the final verified Mystic alpha, MPLC, Python, platform, and architecture.
 
 ## Verification Record
 
 ```text
-Mystic version/build: 1.12 A__
+Mystic version/build: 1.12 Alpha ___
 Operating system:
-Architecture:
+Architecture and bitness:
 MPLC version:
-Python major version:
-Python library version:
-MPL compile result:
-MPL runtime result:
-MPY import result:
-MPY runtime result:
-Record read/write result:
-Menu execution result:
-Command-line execution result:
+Python 2 library and path:
+Python 3 library and path:
+MPL recompiled:
+MPY menu execution tested:
+MPY prompt execution tested:
+User dictionaries tested:
+Message API tested:
+File-list API tested:
+Theme fallback tested:
+Terminal sizes tested:
+Password migration tested:
+Servers and IPv6 tested:
+Login hooks tested:
 Notes:
 ```
 
-## Known Uncertainties
+## Documentation Impact
 
-The following require build-specific documentation:
+Mystic 1.12 requires dedicated documentation for:
 
-- Exact alpha build where embedded Python first appeared
-- Exact alpha build where the replacement Python 2/3 engine appeared
-- Python shared-library naming by platform
-- Which Mystic functions are available in Python 2 versus Python 3 mode
-- Dictionary key additions, removals, and type changes
-- MPY command-line argument behavior
-- MPL record and array differences among alpha builds
-- 32-bit versus 64-bit behavior
-
-These details should be added directly to this file as they are tested rather than requiring the reader to consult another wiki.
+- MPY overview and installation
+- Python 2 versus Python 3
+- MPY execution contexts
+- MPY functions and dictionaries
+- MPY message and file-list APIs
+- MPL file I/O
+- MPL compiler options and limits
+- User-record and password changes
+- Theme directories and fallbacks
+- Terminal-size and display-file lookup
+- Login hooks
+- MIS2 and server security
+- Network automation
+- Version and alpha compatibility
