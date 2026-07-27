@@ -2,99 +2,346 @@
 
 Conditional logic allows an MPL program to make decisions and execute different statements based on whether an expression evaluates to `True` or `False`.
 
-MPL uses Pascal-style conditional syntax. The exact behavior of compound conditions, `Case` statements, string comparisons, and compiler-specific extensions should be verified against the Mystic BBS release being documented.
+This page covers:
+
+- Boolean values and expressions
+- Comparison and logical operators
+- `If`, `Else If`, and `Else`
+- Nested conditions and guard conditions
+- `Case` statements
+- Conditions using functions and bit flags
+- Common control-flow mistakes
 
 > **Documentation status**
 >
-> This page is an initial reference. Examples and edge cases should be tested with the active MPL compiler before the page is marked verified.
+> This page documents modern Pascal-style MPL syntax used by Mystic 1.10 and later. Compiler-sensitive behavior, including logical short-circuiting and string comparison details, should still be tested with the exact Mystic and MPLC release in use.
 
 ## Boolean Conditions
 
 A condition is an expression that evaluates to a Boolean result.
 
-Examples:
-
 ```pascal
 UserLevel >= 10
 UserName = 'Sysop'
-IsActive = True
+IsActive
 Not IsLocked
 ```
 
-Conditions are commonly built with comparison and logical operators.
-
-See [Operators](Operators) for operator details.
-
-## If Then
-
-Use `If ... Then` to execute a statement only when a condition is true.
+MPL supports the Boolean values:
 
 ```pascal
-If UserLevel >= 10 Then
+True
+False
+```
+
+A Boolean variable can be used directly:
+
+```pascal
+Var IsReady : Boolean = True;
+
+Begin
+  If IsReady Then
+    WriteLn('Ready');
+End;
+```
+
+An explicit comparison with `True` is normally unnecessary.
+
+Prefer:
+
+```pascal
+If IsReady Then
+```
+
+Instead of:
+
+```pascal
+If IsReady = True Then
+```
+
+To test for `False`, use `Not`:
+
+```pascal
+If Not IsReady Then
+  WriteLn('Not ready');
+```
+
+## Comparison Operators
+
+Comparison operators compare two values and return a Boolean result.
+
+| Operator | Meaning |
+|---|---|
+| `=` | Equal |
+| `<>` | Not equal |
+| `<` | Less than |
+| `>` | Greater than |
+| `<=` | Less than or equal |
+| `>=` | Greater than or equal |
+
+Examples:
+
+```pascal
+If Count = 0 Then
+  WriteLn('Count is zero');
+
+If Count <> 0 Then
+  WriteLn('Count is not zero');
+
+If UserLevel >= 20 Then
+  WriteLn('Validated user');
+
+If Attempts < MaximumAttempts Then
+  WriteLn('Another attempt is allowed');
+```
+
+The assignment operator is different:
+
+```pascal
+Count := 10;
+```
+
+Do not use `=` when assigning a value.
+
+## Logical Operators
+
+Logical operators combine or reverse Boolean expressions.
+
+| Operator | Meaning |
+|---|---|
+| `And` | Both expressions must be true |
+| `Or` | At least one expression must be true |
+| `Not` | Reverses a Boolean result |
+
+### `And`
+
+```pascal
+If IsActive And HasAccess Then
+  WriteLn('The user may continue');
+```
+
+Both expressions must evaluate to `True`.
+
+### `Or`
+
+```pascal
+If (Choice = 'Y') Or (Choice = 'y') Then
+  WriteLn('Yes selected');
+```
+
+At least one expression must evaluate to `True`.
+
+### `Not`
+
+```pascal
+If Not FileExist(FileName) Then
+  WriteLn('File not found');
+```
+
+`Not` reverses the Boolean result returned by `FileExist`.
+
+## Parentheses and Evaluation Order
+
+Use parentheses to make compound expressions clear and to control grouping.
+
+```pascal
+If (UserLevel >= 20) And (IsActive Or IsSysop) Then
   WriteLn('Access granted');
 ```
 
-When the condition is false, the statement is skipped.
+Without parentheses, a mixed expression may be difficult to read or may not be grouped as intended.
 
-## If Then with a Block
+Harder to read:
+
+```pascal
+If UserLevel >= 20 And IsActive Or IsSysop And Not IsDeleted Then
+  WriteLn('Access granted');
+```
+
+Clearer:
+
+```pascal
+If ((UserLevel >= 20) And IsActive) Or
+   (IsSysop And Not IsDeleted) Then
+Begin
+  WriteLn('Access granted');
+End;
+```
+
+A complex condition can also be divided into Boolean variables:
+
+```pascal
+Var
+  HasNormalAccess : Boolean;
+  HasSysopAccess : Boolean;
+
+Begin
+  HasNormalAccess := (UserLevel >= 20) And IsActive;
+  HasSysopAccess := IsSysop And Not IsDeleted;
+
+  If HasNormalAccess Or HasSysopAccess Then
+    WriteLn('Access granted');
+End;
+```
+
+## Short-Circuit Behavior
+
+Do not assume that `And` and `Or` stop evaluating as soon as the final result is known unless that behavior has been verified with the target compiler.
+
+Potentially unsafe:
+
+```pascal
+If (Count > 0) And ((Total / Count) > 10) Then
+  WriteLn('Average is greater than ten');
+```
+
+If both sides are evaluated, `Count = 0` can still cause division by zero.
+
+Safer:
+
+```pascal
+If Count > 0 Then
+Begin
+  If (Total / Count) > 10 Then
+    WriteLn('Average is greater than ten');
+End;
+```
+
+## Code Blocks
+
+A condition can control one statement without a separate block.
+
+```pascal
+If IsReady Then
+  WriteLn('Ready');
+```
 
 Use `Begin` and `End` when more than one statement belongs to the condition.
 
 ```pascal
-If UserLevel >= 10 Then
+If IsReady Then
 Begin
-  WriteLn('Access granted');
-  WriteLn('Loading restricted menu');
+  WriteLn('Ready');
+  Attempts := Attempts + 1;
 End;
 ```
 
-Using explicit blocks is recommended even when a condition currently contains one statement. It makes later changes safer and easier to read.
+Using explicit blocks is recommended when a branch may grow later.
 
-## If Else
+## `If` Statement
+
+An `If` statement executes code only when its condition is true.
+
+```pascal
+If Count = 0 Then
+  WriteLn('No records found');
+```
+
+General form:
+
+```pascal
+If <BooleanExpression> Then
+  <Statement>;
+```
+
+Block form:
+
+```pascal
+If <BooleanExpression> Then
+Begin
+  <Statement>;
+  <Statement>;
+End;
+```
+
+Example:
+
+```pascal
+If UserLevel >= 50 Then
+Begin
+  WriteLn('High access level');
+  CanConfigure := True;
+End;
+```
+
+## `If` and `Else`
 
 Use `Else` to provide an alternate path when the condition is false.
 
 ```pascal
-If UserLevel >= 10 Then
-Begin
-  WriteLn('Access granted');
-End
+If IsOnline Then
+  WriteLn('Status: Online')
 Else
-Begin
-  WriteLn('Access denied');
-End;
+  WriteLn('Status: Offline');
 ```
 
-The `Else` belongs to the nearest unmatched `If`.
-
-Use `Begin` and `End` to make the intended structure clear.
-
-## Else If
-
-Multiple conditions can be checked in sequence.
+Block form:
 
 ```pascal
-If UserLevel >= 100 Then
+If IsOnline Then
 Begin
-  WriteLn('Sysop access');
-End
-Else If UserLevel >= 50 Then
-Begin
-  WriteLn('Co-sysop access');
-End
-Else If UserLevel >= 10 Then
-Begin
-  WriteLn('Member access');
+  WriteLn('Status: Online');
+  WriteLn('The user is available.');
 End
 Else
 Begin
-  WriteLn('Guest access');
+  WriteLn('Status: Offline');
+  WriteLn('The user is unavailable.');
 End;
 ```
 
-Conditions are evaluated from top to bottom. The first matching branch is executed.
+The `Else` applies to the nearest unmatched `If`. Use blocks when nested conditions could make that relationship unclear.
 
-Order the most specific or highest-priority checks first.
+## `Else If`
+
+Modern MPL uses two separate keywords:
+
+```pascal
+Else If
+```
+
+Older source may use the obsolete single keyword:
+
+```text
+ElseIf
+```
+
+Example:
+
+```pascal
+If Count = 0 Then
+  WriteLn('No items')
+Else If Count = 1 Then
+  WriteLn('One item')
+Else
+  WriteLn('Several items');
+```
+
+Conditions are evaluated from top to bottom. The first matching branch executes, and the remaining branches are skipped.
+
+Place more specific conditions before broader conditions.
+
+Incorrect order:
+
+```pascal
+If Score >= 50 Then
+  Grade := 'Pass'
+Else If Score >= 90 Then
+  Grade := 'Excellent';
+```
+
+A score of 95 matches the first condition, so the second branch is never reached.
+
+Correct order:
+
+```pascal
+If Score >= 90 Then
+  Grade := 'Excellent'
+Else If Score >= 50 Then
+  Grade := 'Pass'
+Else
+  Grade := 'Fail';
+```
 
 ## Nested Conditions
 
@@ -103,126 +350,138 @@ An `If` statement can appear inside another conditional block.
 ```pascal
 If IsActive Then
 Begin
-  If UserLevel >= 10 Then
-  Begin
-    WriteLn('Active member');
-  End
+  If UserLevel >= 20 Then
+    WriteLn('Access granted')
   Else
+    WriteLn('Access level too low');
+End
+Else
+Begin
+  WriteLn('Account is inactive');
+End;
+```
+
+Deep nesting can become difficult to follow.
+
+Instead of:
+
+```pascal
+If IsActive Then
+Begin
+  If Not IsDeleted Then
   Begin
-    WriteLn('Active guest');
+    If UserLevel >= 20 Then
+    Begin
+      If HasTime Then
+        WriteLn('Access granted');
+    End;
   End;
 End;
 ```
 
-Deep nesting can become difficult to follow. Prefer smaller procedures or clearer compound conditions when practical.
-
-## Compound Conditions
-
-Logical operators combine conditions.
-
-### And
-
-Both expressions must be true.
+Consider combining related conditions:
 
 ```pascal
-If IsActive And (UserLevel >= 10) Then
-Begin
-  WriteLn('Active member access granted');
-End;
-```
-
-### Or
-
-At least one expression must be true.
-
-```pascal
-If (Choice = 'Y') Or (Choice = 'y') Then
-Begin
-  WriteLn('Confirmed');
-End;
-```
-
-### Not
-
-`Not` reverses a Boolean value.
-
-```pascal
-If Not IsLocked Then
-Begin
-  WriteLn('The feature is available');
-End;
-```
-
-Use parentheses to make mixed logical expressions explicit.
-
-```pascal
-If ((UserLevel >= 10) And IsActive) Or IsSysop Then
+If IsActive And
+   Not IsDeleted And
+   (UserLevel >= 20) And
+   HasTime Then
 Begin
   WriteLn('Access granted');
 End;
 ```
 
-## Comparison Examples
+Or move the decision into a Boolean function:
 
-### Numeric comparison
+```pascal
+Function CanEnter : Boolean;
+Begin
+  CanEnter :=
+    IsActive And
+    Not IsDeleted And
+    (UserLevel >= 20) And
+    HasTime;
+End;
+```
+
+## Guard Conditions
+
+A guard condition exits a procedure or function early when processing should not continue.
+
+```pascal
+Procedure DisplayUser(Name String);
+Begin
+  If Name = '' Then
+    Exit;
+
+  WriteLn('User: ' + Name);
+End;
+```
+
+This can be clearer than wrapping the entire procedure in another conditional block.
+
+## Numeric Comparisons
 
 ```pascal
 If MessageCount > 0 Then
   WriteLn('You have messages');
 ```
 
-### String comparison
+## String Comparisons
 
 ```pascal
 If UserName = 'Sysop' Then
   WriteLn('Welcome, Sysop');
 ```
 
-### Character comparison
+Do not assume that string comparisons are case-insensitive.
+
+These values may compare differently:
+
+```text
+Sysop
+SYSOP
+sysop
+```
+
+Normalize input when case should not matter, using a verified MPL string-conversion function.
+
+## Character Comparisons
 
 ```pascal
 If MenuChoice = 'Q' Then
   WriteLn('Exiting');
 ```
 
-### Boolean test
+To accept uppercase and lowercase input:
 
 ```pascal
-If IsEnabled Then
-  WriteLn('Feature enabled');
+If (MenuChoice = 'Q') Or (MenuChoice = 'q') Then
+  WriteLn('Exiting');
 ```
 
-A Boolean variable usually does not need to be compared explicitly with `True`.
-
-This is clearer:
-
-```pascal
-If IsEnabled Then
-```
-
-Than:
-
-```pascal
-If IsEnabled = True Then
-```
-
-Both forms should be verified with the active compiler.
-
-## Case Statements
+## `Case` Statement
 
 A `Case` statement selects one branch based on a single expression.
 
 ```pascal
 Case MenuChoice Of
-  'A': WriteLn('Add selected');
-  'E': WriteLn('Edit selected');
-  'Q': WriteLn('Quit selected');
+  'A':
+    WriteLn('Add selected');
+
+  'E':
+    WriteLn('Edit selected');
+
+  'Q':
+    WriteLn('Quit selected');
+Else
+  WriteLn('Unknown selection');
 End;
 ```
 
-`Case` is useful when several branches compare the same value.
+Use `Case` when several branches compare the same value against exact alternatives.
 
-## Case with Blocks
+## `Case` with Blocks
 
 Use `Begin` and `End` when a branch contains multiple statements.
 
@@ -231,99 +490,206 @@ Case MenuChoice Of
   'A':
   Begin
     WriteLn('Add selected');
-    WriteLn('Opening add screen');
+    AddRecord;
+    WriteLn('Record added');
   End;
 
   'E':
   Begin
     WriteLn('Edit selected');
-    WriteLn('Opening edit screen');
+    EditRecord;
+    WriteLn('Record updated');
   End;
-End;
-```
-
-## Case with Multiple Values
-
-Some Pascal-like compilers allow multiple values to share a branch.
-
-```pascal
-Case MenuChoice Of
-  'Y', 'y': WriteLn('Confirmed');
-  'N', 'n': WriteLn('Cancelled');
-End;
-```
-
-MPL support for multiple values in one branch must be verified.
-
-## String Case Support
-
-Modern MPL compilers may support string expressions in `Case` statements.
-
-Example form:
-
-```pascal
-Case Command Of
-  'HELP': WriteLn('Displaying help');
-  'QUIT': WriteLn('Exiting');
-End;
-```
-
-String `Case` behavior is version-specific and must be tested before being documented as portable.
-
-Verify:
-
-- Whether string values are supported
-- Whether comparison is case-sensitive
-- Whether duplicate values are rejected
-- Whether an `Else` branch is supported
-
-## Default or Else Branch
-
-Some MPL compiler versions may support an `Else` branch inside a `Case` statement.
-
-Example form:
-
-```pascal
-Case MenuChoice Of
-  'A': WriteLn('Add selected');
-  'E': WriteLn('Edit selected');
 Else
   WriteLn('Unknown selection');
 End;
 ```
 
-This syntax must be verified before use in a tested example.
+## Multiple Values in One Branch
 
-## Short-Circuit Behavior
-
-Do not assume logical conditions stop evaluation as soon as the final result is known.
-
-Potentially unsafe:
+Several values can share one branch.
 
 ```pascal
-If (Count > 0) And ((Total Div Count) > 10) Then
-  WriteLn('Average is greater than ten');
+Case MenuChoice Of
+  'Y', 'y':
+    WriteLn('Confirmed');
+
+  'N', 'n':
+    WriteLn('Cancelled');
+Else
+  WriteLn('Please enter Y or N');
+End;
 ```
 
-If MPL evaluates both expressions, division by zero may still occur when `Count` is zero.
-
-Safer structure:
+## Numeric `Case`
 
 ```pascal
-If Count > 0 Then
+Case MenuNumber Of
+  1:
+    WriteLn('First option');
+
+  2, 3, 4:
+    WriteLn('Middle option');
+
+  5:
+    WriteLn('Last option');
+Else
+  WriteLn('Invalid option');
+End;
+```
+
+## String `Case`
+
+Modern MPL expands `Case` handling to additional value types, including strings.
+
+```pascal
+Case Command Of
+  'LIST':
+    WriteLn('Listing records');
+
+  'ADD':
+    WriteLn('Adding a record');
+
+  'DELETE':
+    WriteLn('Deleting a record');
+Else
+  WriteLn('Unknown command');
+End;
+```
+
+String `Case` behavior, including case sensitivity, should be verified with the exact MPLC version used by the BBS.
+
+## Choosing `Case` or `If`
+
+Use `Case` when:
+
+- One value is compared against several exact alternatives
+- Several values share the same action
+- A menu or command selector is being processed
+
+```pascal
+Case Choice Of
+  'A': AddRecord;
+  'D': DeleteRecord;
+  'Q': Exit;
+End;
+```
+
+Use `If` when:
+
+- Conditions use ranges
+- Several variables are involved
+- Conditions use `And`, `Or`, or `Not`
+- Each branch tests a different expression
+
+```pascal
+If (Age >= 18) And HasPermission Then
+  AllowAccess;
+```
+
+## Conditions with Bit Flags
+
+Modern MPL supports bitwise operators.
+
+```pascal
+Const
+  UserDeleted = $00000004;
+
+If (UserFlags And UserDeleted) <> 0 Then
+  WriteLn('User is marked deleted');
+```
+
+Mystic also provides functions such as `BitCheck`:
+
+```pascal
+If BitCheck(3, UserFlags) Then
+  WriteLn('User is marked deleted');
+```
+
+Use the form that matches the documented flag numbering for the target Mystic release.
+
+## Conditions with Function Results
+
+Boolean-returning functions can be used directly:
+
+```pascal
+If FileExist(FileName) Then
+  WriteLn('File exists');
+```
+
+A function used in a condition may also have side effects, such as:
+
+- Reading a record
+- Consuming keyboard input
+- Advancing an index
+- Changing Mystic runtime variables
+- Modifying `Var` parameters
+
+Confirm those effects before using the function in a complex condition.
+
+## Complete Example
+
+```pascal
+Var
+  UserLevel : Integer = 20;
+  IsActive : Boolean = True;
+  IsDeleted : Boolean = False;
+  MenuChoice : Char = 'S';
+  AccessName : String;
+
 Begin
-  If (Total Div Count) > 10 Then
+  If Not IsActive Then
   Begin
-    WriteLn('Average is greater than ten');
+    WriteLn('Account is inactive');
+    Halt;
+  End;
+
+  If IsDeleted Then
+  Begin
+    WriteLn('Account is deleted');
+    Halt;
+  End;
+
+  If UserLevel >= 100 Then
+    AccessName := 'Sysop'
+  Else If UserLevel >= 50 Then
+    AccessName := 'Co-Sysop'
+  Else If UserLevel >= 20 Then
+    AccessName := 'Validated'
+  Else
+    AccessName := 'New User';
+
+  WriteLn('Access: ' + AccessName);
+
+  Case MenuChoice Of
+    'A', 'a':
+      WriteLn('Add selected');
+
+    'S', 's':
+      WriteLn('Status selected');
+
+    'Q', 'q':
+      WriteLn('Quit selected');
+  Else
+    WriteLn('Unknown menu choice');
   End;
 End;
 ```
 
-Short-circuit behavior should be tested and recorded for each supported compiler version.
+This example demonstrates:
+
+- Boolean conditions
+- `Not`
+- Guard-style termination
+- `Else If`
+- Ordered range checks
+- Character `Case`
+- Multiple values in one `Case` branch
+- A default `Else` branch
 
 ## Common Errors
 
-### Using assignment in a condition
+### Using Assignment in a Condition
 
 Incorrect:
 
@@ -337,7 +703,7 @@ Correct:
 If UserLevel = 10 Then
 ```
 
-### Using C-style comparison operators
+### Using C-Style Comparison Operators
 
 Incorrect:
 
@@ -346,16 +712,46 @@ If UserLevel == 10 Then
 If UserLevel != 10 Then
 ```
 
-Use Pascal-style operators:
+Correct:
 
 ```pascal
 If UserLevel = 10 Then
 If UserLevel <> 10 Then
 ```
 
-### Omitting a block for multiple statements
+### Forgetting `Then`
 
-Incorrect structure:
+Incorrect:
+
+```pascal
+If UserLevel = 10
+  WriteLn('Level ten');
+```
+
+Correct:
+
+```pascal
+If UserLevel = 10 Then
+  WriteLn('Level ten');
+```
+
+### Using the Obsolete `ElseIf` Keyword
+
+Older form:
+
+```text
+ElseIf UserLevel >= 20
+```
+
+Modern form:
+
+```pascal
+Else If UserLevel >= 20 Then
+```
+
+### Omitting a Block for Multiple Statements
+
+Incorrect:
 
 ```pascal
 If IsActive Then
@@ -365,7 +761,7 @@ If IsActive Then
 
 Only the first statement is controlled by the condition.
 
-Use a block:
+Correct:
 
 ```pascal
 If IsActive Then
@@ -375,95 +771,78 @@ Begin
 End;
 ```
 
-### Ambiguous Else placement
+### Reversing `And` and `Or`
 
-Nested conditions without blocks can make it unclear which `If` owns the `Else`.
-
-Prefer explicit blocks.
-
-### Assuming case-insensitive string comparison
-
-Do not assume these values compare equally:
-
-```text
-Sysop
-SYSOP
-sysop
-```
-
-Test and document the behavior of the active compiler.
-
-## Example Program
+Incorrect for uppercase or lowercase input:
 
 ```pascal
-Var
-  UserLevel : Integer;
-  IsActive  : Boolean;
-
-Begin
-  UserLevel := 20;
-  IsActive := True;
-
-  If IsActive Then
-  Begin
-    If UserLevel >= 50 Then
-    Begin
-      WriteLn('Administrative access');
-    End
-    Else If UserLevel >= 10 Then
-    Begin
-      WriteLn('Member access');
-    End
-    Else
-    Begin
-      WriteLn('Guest access');
-    End;
-  End
-  Else
-  Begin
-    WriteLn('Account is inactive');
-  End;
-
-  WriteLn('|PA');
-End.
+If (Choice = 'Y') And (Choice = 'y') Then
 ```
 
-This example demonstrates:
+Correct:
 
-- Boolean conditions
-- Nested `If` statements
-- `Else If`
-- `Else`
-- Comparison operators
-- Explicit `Begin` and `End` blocks
+```pascal
+If (Choice = 'Y') Or (Choice = 'y') Then
+```
+
+### Placing a Broad Condition First
+
+Incorrect:
+
+```pascal
+If Score >= 50 Then
+  Grade := 'Pass'
+Else If Score >= 90 Then
+  Grade := 'Excellent';
+```
+
+Correct:
+
+```pascal
+If Score >= 90 Then
+  Grade := 'Excellent'
+Else If Score >= 50 Then
+  Grade := 'Pass';
+```
+
+### Ambiguous `Else` Placement
+
+Nested conditions without blocks can make it unclear which `If` owns the `Else`. Use explicit blocks.
+
+### Omitting the `Case` Default
+
+A missing `Else` branch may be valid, but unexpected values are silently ignored. User-input selectors should normally include a default branch.
 
 ## Verification Checklist
 
 Before marking this page verified, test and record:
 
-- `If ... Then` syntax
-- `Else` syntax
-- `Else If` syntax
+- `If ... Then`
+- `Else`
+- `Else If`
 - Nested-condition behavior
 - `Begin` and `End` requirements
 - Numeric comparisons
 - String comparisons
 - Character comparisons
-- Boolean conditions
+- Boolean values
 - `And`, `Or`, and `Not`
 - Logical operator precedence
 - Short-circuit behavior
-- `Case` statement syntax
-- Multiple values in one `Case` branch
-- String `Case` support
-- Default or `Else` branch support in `Case`
+- Numeric `Case`
+- Character `Case`
+- Multiple values in one branch
+- String `Case`
+- `Else` inside `Case`
+- Bitwise condition behavior
 
 Suggested verification record:
 
 ```text
 Mystic version:
+MPLC version:
 Operating system:
-Compiler path or build:
+Architecture:
 Date tested:
 If/Else confirmed:
 Logical operators confirmed:
@@ -472,6 +851,38 @@ String Case confirmed:
 Short-circuit behavior confirmed:
 Notes:
 ```
+
+## Documentation Status
+
+This page currently covers:
+
+- Boolean values and expressions
+- Comparison operators
+- Logical operators
+- Parentheses and evaluation order
+- Short-circuit safety
+- `If`, `Else`, and `Else If`
+- Nested and guard conditions
+- Numeric, character, and string comparisons
+- Numeric, character, and string `Case`
+- Multiple `Case` values
+- Bit flags
+- Function results in conditions
+- Common mistakes
+
+Additional compiler testing is still needed for:
+
+- Exact logical operator precedence
+- Short-circuit behavior
+- String comparison case sensitivity
+- String `Case` case sensitivity
+- Range syntax inside `Case`
+- Empty `Case` branches
+- Duplicate `Case` values
+- Interaction with alternate C-like MPL syntax
+- Differences between 32-bit and 64-bit Mystic builds
+
+Examples should be tested with the exact Mystic and MPLC version used by the target BBS.
 
 ## Related Pages
 
@@ -483,3 +894,9 @@ Notes:
 - [Functions](Functions)
 - [Version Compatibility](Version-Compatibility)
 - [Documentation Status](Documentation-Status)
+
+## References
+
+- [Mystic BBS Wiki: Mystic Programming Language](https://wiki.mysticbbs.com/doku.php?id=mpl)
+- [Mystic BBS Wiki: Mystic 1.10 Changes](https://wiki.mysticbbs.com/doku.php?id=whats_new_110)
+- [Mystic BBS Source and Release Notes](https://github.com/fidosoft/mysticbbs)
