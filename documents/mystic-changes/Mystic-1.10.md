@@ -1,182 +1,179 @@
 # Mystic 1.10 Changes
 
-Status: **Documented — compiler verification recommended**
+Status: **Expanded into detailed alpha-build documentation**
 
-## Release Summary
+Mystic 1.10 was one of the largest compatibility and modernization releases in Mystic history. The development cycle covered sixty-three alpha builds before the final release on February 20, 2015.
 
-Mystic 1.10 was a major MPL modernization release. It changed the compiled script extension, expanded Pascal-style syntax, corrected expression behavior, added local and nested declarations, improved arrays and records, and renamed or removed several older built-ins. It also continued substantial work across Mystic's servers, menus, prompts, message and file systems, and platform support.
+The release changed Mystic software broadly and redesigned major parts of Mystic Programming Language. Because of the volume of changes, detailed documentation is divided into chronological phase files.
 
-## Mystic Software Changes
+## Detailed Alpha History
 
-Mystic 1.10 continued the transition toward a modern Internet BBS platform. The release cycle included server, configuration, message-network, file-processing, display, and runtime changes. SysOps should treat the version as both a software upgrade and an MPL migration point.
+- [Alpha 1 through Alpha 21](1.10/Alpha-01-21.md) — MPL parser redesign, Pascal-style syntax, file I/O, expressions, local declarations, arrays, records, functions, and `.mpx` migration foundations
+- [Alpha 22 through Alpha 32](1.10/Alpha-22-32.md) — message bases, NodeSpy, ANSI, transfers, menus, file tagging, nodelists, QWK/QWKE, login scripting, MUTIL, FIDOPOLL, and mail statistics
+- [Alpha 33 through Alpha 43](1.10/Alpha-33-43.md) — editor fixes, ARM Linux, themes, MPL classes, BinkP, QWK networks, AreaFix, FileFix, domains, and filtering
+- [Alpha 44 through Alpha 63 and final release](1.10/Alpha-44-63-and-release.md) — network stabilization, FTP, BinkP, ICE colors, automatic banning, Linux fixes, group handling, node chat, viewers, events, prompt internals, and final release fixes
 
-Execution errors from MPL programs became easier to notice because Mystic briefly delayed after displaying an MPL execution error rather than immediately clearing or replacing it.
+A directory-level overview is available at [Mystic 1.10 Detailed Change History](1.10/README.md).
 
-## Compiled MPL Extension
+## Major Mystic Software Changes
 
-The compiled script extension changed from `.mpe` to `.mpx`.
+Mystic 1.10 advanced the software into a broader Internet-connected BBS platform. Major areas of development included:
 
-```text
-program.mps -> program.mpx
+- MIS server expansion
+- BinkP, FTP, NNTP, telnet, and transfer improvements
+- QWK and QWKE offline mail
+- QWK networking
+- Echomail and netmail import, export, routing, and 5D addressing
+- MUTIL and FIDOPOLL
+- AreaFix and FileFix
+- New or revised menus, prompts, themes, editors, viewers, and node tools
+- User-to-user chat and node-chat commands
+- File tagging, archive viewing, and file-description display
+- Event and semaphore automation
+- Linux, Windows, ARM, and terminal compatibility work
+- User, group, message-base, file-base, and configuration data changes
+
+## Major MPL Changes
+
+### Modern parser and syntax
+
+MPL moved toward a more complete Pascal-style grammar:
+
+```pascal
+If IsReady Then
+Begin
+  WriteLn('Ready');
+End;
 ```
 
-Menus, events, macros, command lines, deployment scripts, and documentation that explicitly referenced `.mpe` files required updating.
+`Then`, `Do`, and `Begin`/`End` replaced or superseded historical forms such as `EndIf`, `WEnd`, `FEnd`, and a single `ElseIf` token.
 
-## MPL Language Changes
+### Mathematical behavior
 
-### Mathematical Expressions
-
-MPL gained standard operator precedence and parentheses. Older documentation that says MPL always performs calculations strictly from left to right applies to earlier engines.
+Standard operator precedence and parentheses were added:
 
 ```pascal
 Result := 2 + 3 * 4;
 Result := (2 + 3) * 4;
 ```
 
-These expressions now produce different results according to normal mathematical grouping.
+This could change the runtime result of older programs even when they compiled successfully.
 
-### Local Declarations
+### Variables and routines
 
-Variables could be declared in local routines and blocks with more complete behavior than older engines.
+MPL gained or expanded:
 
-```pascal
-Procedure DisplayName(Name String);
-Var
-  LabelText : String;
-Begin
-  LabelText := 'User: ' + Name;
-  WriteLn(LabelText);
-End;
-```
+- Local variables
+- Declaration initialization
+- Nested procedures and functions
+- Recursive procedures
+- `Var` reference parameters
+- Longer identifiers
+- A much higher variable limit
 
-Declaration initialization was also expanded:
+### Strings, arrays, and records
 
-```pascal
-Var Count : Integer = 0;
-```
+The language gained or improved:
 
-### Nested Routines
+- Explicit string lengths such as `String[30]`
+- Numeric character references such as `#32`
+- Character indexing into strings
+- Multidimensional arrays
+- More capable record handling
+- Arrays and records used in more complex structures
 
-Procedures and functions could be declared inside another procedure or function. This allowed helper routines to remain private to the outer routine.
+### Control flow
 
-### Recursive Procedures
+Modern control-flow features included:
 
-Procedures could call themselves. Every recursive routine requires a terminating condition.
+- `Case`
+- `Break`
+- `Continue`
+- Modern `Else If`
+- Pascal-style `For`, `While`, and `Repeat` forms
 
-### `Var` Parameters
+### File I/O
 
-Pascal-style reference parameters allowed a routine to modify the caller's variable.
+The old specialized record functions were replaced by a broader `File`-based model with explicit open, read, write, close, position, size, and error behavior. `IoResult` became central to safe error handling.
 
-```pascal
-Procedure ResetCount(Var Count : Integer);
-Begin
-  Count := 0;
-End;
-```
+### Functions, variables, and runtime integration
 
-### Block Comments
+The release added or expanded many areas, including:
 
-Pascal-style block comments were added:
+- Word and string parsing
+- Date, Julian, Gregorian, and timer operations
+- Path and filename functions
+- Environment-variable access
+- Directory and file tests
+- Pipe-aware and raw terminal output
+- Screen character and attribute inspection
+- Bitwise operations and bit helpers
+- Program name and parameter variables
+- Configuration, message-base, file-base, user, and network variables
+- Login integration through startup MPL
+- MPL class interfaces for ANSI boxes, input, images, and screens
 
-```pascal
-(*
-  Multi-line comment
-*)
-```
+### Renamed and removed identifiers
 
-### Arrays
+Important migrations included:
 
-MPL added broader multidimensional-array support, including arrays with up to three dimensions in documented modern usage.
-
-```pascal
-Var Grid : Array[1..80, 1..25] of Char;
-```
-
-### Control Flow
-
-Modern Pascal-style control flow replaced or superseded several historical forms. Documentation should use:
-
-```pascal
-If Condition Then
-Begin
-  Statement;
-End;
-```
-
-Rather than treating older keywords such as `EndIf`, `FEnd`, `WEnd`, or a single `ElseIf` token as current syntax.
-
-`Break` and `Continue` became available for loop control.
-
-### Function Results May Be Ignored
-
-A function could be called for its side effect without assigning or otherwise using its return value.
-
-This is useful for input or display functions, but a result containing success, failure, or user input should not be discarded accidentally.
-
-## Renamed and Removed Identifiers
-
-Several built-ins were renamed for clarity.
-
-| Older identifier | Newer identifier |
+| Older name | Newer name |
 |---|---|
 | `fExist` | `FileExist` |
 | `fErase` | `FileErase` |
 | `fCopy` | `FileCopy` |
 | `CLS` | `ClrScr` |
+| `USERLAST` | `UserLastOn` |
+| `USERFIRST` | `UserFirstOn` |
+| `FB...` variables | `FBASE...` naming |
 
-The older `IsNoFile` pattern was removed after `DispFile` gained a Boolean result that could directly indicate whether a file was displayed.
+`IsNoFile` was removed after `DispFile` returned a Boolean result.
 
-Source migration should search for every older name before recompilation.
+### Compiled extension
 
-## MPL Runtime and Compiler Impact
+Compiled programs changed from `.mpe` to `.mpx`:
 
-Mystic 1.10 should not be treated as a simple recompile-only upgrade for all source. Existing code may need edits because of:
+```text
+program.mps -> program.mpx
+```
 
-- Renamed and removed identifiers
-- Changed expression evaluation
-- Modernized control-flow syntax
-- More accurate type checking
-- New local-scope behavior
-- Changed compiled extension
-- Expanded array and record rules
-
-Tests should compare actual runtime output, not only successful compilation.
+All menus, events, startup commands, deployment scripts, and documentation referencing `.mpe` required review.
 
 ## MPY and Python Changes
 
 **MPY was not available in Mystic 1.10.**
 
-The embedded Python engine and `.mpy` format appeared later in the 1.12 development cycle.
+The embedded Python engine and `.mpy` scripts appeared later during the Mystic 1.12 development cycle.
 
 ## Compatibility Impact
 
-This is one of the most important migration boundaries in Mystic scripting history.
+Mystic 1.10 should not be treated as a recompile-only upgrade. Existing source could be affected by:
 
-A script may compile but behave differently because operator precedence changed. Parentheses should be added where the intended order must be explicit.
-
-Deployment automation and menu commands must use `.mpx` instead of `.mpe`.
+- Parser and block syntax changes
+- New expression evaluation order
+- Renamed or removed identifiers
+- Changed file I/O
+- New local-scope behavior
+- More accurate type checking
+- Record and array changes
+- Function-signature changes
+- Different compiled output extension
+- Corrected message, user, group, network, and configuration records
 
 ## Upgrade Actions
 
-1. Back up all MPL source, includes, and compiled `.mpe` files.
-2. Search for renamed and removed built-ins.
-3. Review every nontrivial mathematical and Boolean expression.
-4. Convert historical control-flow syntax to the modern Pascal-style form.
-5. Recompile with the target 1.10 MPLC.
-6. Rename or redeploy compiled output as `.mpx`.
-7. Test procedures, functions, local variables, arrays, and record access.
-8. Update menus, macros, and command-line execution paths.
-
-## Documentation Impact
-
-- `wiki/MPL-Syntax.md`
-- `wiki/Variables.md`
-- `wiki/Procedures.md`
-- `wiki/Functions.md`
-- `wiki/Conditional-Logic.md`
-- `wiki/Loops.md`
-- `wiki/Compiler-Usage.md`
-- `wiki/Version-Compatibility.md`
+1. Back up the full Mystic installation and all MPL source.
+2. Keep legacy `.mpe` files until replacement `.mpx` programs are tested.
+3. Convert historical syntax to the modern parser rules.
+4. Search source and includes for renamed functions and variables.
+5. Review every arithmetic and Boolean expression.
+6. Migrate old file I/O and add explicit error checks.
+7. Recompile with the exact target MPLC build.
+8. Update menus and commands to use `.mpx`.
+9. Test every program under real terminal and node conditions.
+10. Test message, file, QWK, echomail, netmail, BinkP, FTP, and event workflows used by the system.
+11. Validate authentication scripts and avoid logging credentials.
+12. Record the final verified compiler, platform, and Mystic build.
 
 ## Verification Record
 
@@ -185,13 +182,34 @@ Mystic version/build: 1.10
 Operating system:
 Architecture:
 MPLC version:
-.mpx deployment test:
-Operator precedence test:
-Local variable test:
-Var parameter test:
-Nested routine test:
-Recursive procedure test:
-Array test:
-Renamed identifier migration test:
+Source migration completed:
+.mpx deployment tested:
+Expression results compared:
+File I/O tested:
+Local and nested routines tested:
+Var parameters tested:
+Arrays and records tested:
+Message and network integration tested:
+Menus and events updated:
 Notes:
 ```
+
+## Documentation Impact
+
+Mystic 1.10 affects nearly every language and integration page in this repository, especially:
+
+- MPL syntax
+- Variables and data types
+- Procedures and functions
+- Conditional logic and loops
+- Operators
+- Arrays and records
+- Strings
+- File handling
+- Compiler usage
+- Include files
+- ANSI and screen output
+- Menus and prompts
+- User, message-base, and file-base access
+- Network integration
+- Version compatibility
