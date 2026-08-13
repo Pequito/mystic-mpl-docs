@@ -1,31 +1,43 @@
 # Data Types
 
-Data types define what kind of value a variable can store and which operations can be performed on that value.
+Data types define what kind of value an MPL variable can store, how much storage it uses, and which operations are valid for that value.
 
-MPL follows a Pascal-like syntax, but the exact set of supported types, size limits, conversion behavior, and version-specific restrictions should be verified against the Mystic BBS release being used.
+Modern MPL uses Pascal-style declarations and supports scalar types, strings, arrays, records, and a `File` type used by the MPL file-I/O system.
 
 > **Documentation status**
 >
-> This page is an initial reference and requires compiler verification. Numeric ranges, string limits, and less common types should not be treated as final until tested and documented for a specific Mystic version.
+> The core types on this page are documented by the Mystic MPL reference and Mystic 1.10 change history. Some published range information is inconsistent or appears to contain typographical errors, so boundary values should be compiler-tested before being treated as authoritative for every Mystic build.
 
-## Common Data Types
+## Supported Scalar Types
 
-The following types are commonly encountered in MPL source code:
+The current Mystic MPL reference documents these scalar types:
 
-| Type | Purpose | Example value |
+| Type | Purpose | Documented form |
 |---|---|---|
-| `String` | Stores text | `'Hello'` |
-| `Char` | Stores a single character | `'A'` |
-| `Byte` | Stores a small non-negative integer | `25` |
-| `Integer` | Stores a whole number | `-42` |
-| `LongInt` | Stores a larger whole number, where supported | `100000` |
-| `Boolean` | Stores a logical state | `True` |
+| `Boolean` | Logical state | `True` / `False` |
+| `Char` | One character | `'A'` |
+| `String` | Text | `'Hello'` |
+| `Byte` | Small unsigned integer | `0..255` |
+| `Integer` | Signed integer | approximately 16-bit |
+| `Word` | Unsigned integer | `0..65535` |
+| `LongInt` | Larger signed integer | 4-byte integer |
+| `Cardinal` | Larger unsigned integer | `0..4294967295` in the current reference |
+| `Real` | Floating-point number | decimal value |
 
-Additional or specialized types may be available depending on the Mystic version and compiler.
+Mystic 1.10 documents the following storage sizes:
+
+```text
+Byte, Char    = 1 byte
+Integer, Word = 2 bytes
+LongInt       = 4 bytes
+String        = declared length + 1 byte
+```
+
+The current quick-reference page contains a likely typographical error in the published `LongInt` range. For that reason, this wiki records the documented storage size and recommends testing exact minimum and maximum values with the target MPLC build.
 
 ## Declaring Variables
 
-Variables are declared in a `Var` section before the main program block or within another supported scope.
+Modern MPL follows Pascal-style variable declarations:
 
 ```pascal
 Var
@@ -33,153 +45,42 @@ Var
   Initial  : Char;
   Age      : Integer;
   IsActive : Boolean;
-
-Begin
-  UserName := 'Mystic User';
-  Initial  := 'M';
-  Age      := 25;
-  IsActive := True;
-End.
 ```
 
-Each declaration contains:
-
-```text
-VariableName : DataType;
-```
-
-The assignment operator is:
-
-```pascal
-:=
-```
-
-See [Variables](Variables) for variable naming and declaration rules.
-
-## String
-
-A `String` stores text.
+Multiple variables of the same type can share a declaration:
 
 ```pascal
 Var
-  MessageText : String;
-
-Begin
-  MessageText := 'Welcome to Mystic BBS';
-  WriteLn(MessageText);
-End.
+  X, Y : Byte;
 ```
 
-String literals are normally enclosed in single quotation marks:
+Mystic 1.10 standardized this syntax and also added local variable declarations inside procedures and functions.
 
-```pascal
-'Example text'
-```
+See [Variables](Variables) for declaration scope and initialization rules.
 
-### Empty strings
+## Variable Initialization
 
-An empty string contains no characters:
-
-```pascal
-MessageText := '';
-```
-
-### Combining strings
-
-MPL commonly uses the plus operator to join strings:
-
-```pascal
-WriteLn('Hello, ' + UserName);
-```
-
-String concatenation behavior should be tested with the active compiler, especially when combining strings with numeric or Boolean values.
-
-### String limits
-
-The maximum supported string length may depend on the compiler and Mystic version. Do not document a fixed limit until it has been verified.
-
-## Char
-
-A `Char` stores one character.
+Modern MPL allows most variables to be initialized when declared.
 
 ```pascal
 Var
-  MenuChoice : Char;
-
-Begin
-  MenuChoice := 'A';
-End.
+  Count    : Integer = 10;
+  UserName : String = 'Sysop';
+  IsReady  : Boolean = True;
 ```
 
-A character literal is enclosed in single quotation marks, similar to a string literal:
-
-```pascal
-'Y'
-```
-
-The compiler determines whether a quoted value is valid for a `Char` variable based on its length.
-
-## Byte
-
-A `Byte` stores a small non-negative integer.
+Variables can also be initialized from a function result:
 
 ```pascal
 Var
-  ColorNumber : Byte;
-
-Begin
-  ColorNumber := 7;
-End.
+  TotalBases : LongInt = GetMBaseTotal(False);
 ```
 
-Use `Byte` when the value is known to remain within the compiler-supported byte range.
+The current MPL reference states that arrays are an exception to declaration-time initialization.
 
-The exact range should be verified before relying on boundary values.
+## `Boolean`
 
-## Integer
-
-An `Integer` stores whole numbers, including negative values where supported.
-
-```pascal
-Var
-  UserCount : Integer;
-  Difference : Integer;
-
-Begin
-  UserCount := 42;
-  Difference := -5;
-End.
-```
-
-Integer values can commonly be used with arithmetic and comparison operators:
-
-```pascal
-UserCount := UserCount + 1;
-
-If UserCount > 10 Then
-  WriteLn('More than ten users');
-```
-
-See [Operators](Operators) for arithmetic and comparison behavior.
-
-## LongInt
-
-`LongInt` is used for larger whole-number values in Pascal-like languages and may be available in MPL.
-
-```pascal
-Var
-  LargeValue : LongInt;
-
-Begin
-  LargeValue := 100000;
-End.
-```
-
-Support, storage size, and value limits must be verified against the target Mystic compiler before using this type in portable examples.
-
-## Boolean
-
-A `Boolean` stores one of two logical values:
+A `Boolean` stores a logical state:
 
 ```pascal
 True
@@ -189,178 +90,553 @@ False
 Example:
 
 ```pascal
-Var
-  IsEnabled : Boolean;
+Var IsEnabled : Boolean = True;
 
 Begin
-  IsEnabled := True;
-
   If IsEnabled Then
-    WriteLn('The feature is enabled');
-End.
+    WriteLn('Enabled');
+End;
 ```
 
-Boolean values are commonly used with conditional statements and logical operators.
+Boolean values are primarily used with conditional logic and logical operators.
 
 See [Conditional Logic](Conditional-Logic) and [Operators](Operators).
 
-## Assigning Values
+## `Char`
 
-The assigned value must be compatible with the variable's declared type.
-
-Valid examples:
+A `Char` stores one character.
 
 ```pascal
-UserName := 'Sysop';
-Age := 30;
-IsActive := True;
+Var MenuChoice : Char = 'A';
 ```
 
-Potential type mismatches:
+Mystic 1.10 also added numeric character references using `#` followed by an ASCII value:
 
 ```pascal
-Age := 'Thirty';
-IsActive := 1;
-Initial := 'AB';
+If MenuChoice = #32 Then
+  WriteLn('Space was pressed');
 ```
 
-The compiler may reject incompatible assignments or require an explicit conversion function.
+A `Char` occupies one byte according to the Mystic 1.10 change history.
+
+## `String`
+
+A `String` stores text.
+
+```pascal
+Var UserName : String = 'Mystic User';
+```
+
+String literals use single quotes:
+
+```pascal
+'Hello World'
+```
+
+### String Length
+
+Mystic 1.10 added explicit string lengths:
+
+```pascal
+Var ShortName : String[10];
+```
+
+When no length is supplied, the official documentation states that the default maximum is 255 characters:
+
+```pascal
+Var FullText : String;
+```
+
+The documented storage requirement is the declared string length plus one byte.
+
+### Empty String
+
+An empty string contains no characters:
+
+```pascal
+UserName := '';
+```
+
+### String Indexing
+
+Modern MPL allows strings to be accessed as an array of characters in most places:
+
+```pascal
+Var S : String;
+
+Begin
+  S := 'Hello';
+
+  If S[1] = 'H' Then
+    WriteLn('First character is H');
+End;
+```
+
+The indexing convention should be treated as one-based unless a compiler test demonstrates otherwise for a specific context.
+
+### String Concatenation
+
+Strings can be joined with `+`:
+
+```pascal
+WriteLn('Hello, ' + UserName);
+```
+
+Numeric values normally require explicit conversion before being concatenated with text:
+
+```pascal
+WriteLn('Count: ' + Int2Str(Count));
+```
+
+## `Byte`
+
+A `Byte` is a small unsigned integer.
+
+The current MPL reference documents:
+
+```text
+0..255
+```
+
+Example:
+
+```pascal
+Var ColorNumber : Byte = 7;
+```
+
+Common uses include:
+
+- ANSI color values
+- Small counters
+- Menu indexes
+- X/Y coordinates
+- Bit-field values
+
+## `Integer`
+
+`Integer` is a signed whole-number type.
+
+Mystic 1.10 documents it as a 2-byte value and added support for negative numbers.
+
+```pascal
+Var
+  Count      : Integer = 20;
+  Difference : Integer = -5;
+```
+
+The current quick reference lists a range close to a standard signed 16-bit integer. Boundary behavior should be tested before relying on the extreme values.
+
+## `Word`
+
+`Word` is an unsigned 2-byte integer type.
+
+The current MPL reference documents:
+
+```text
+0..65535
+```
+
+Example:
+
+```pascal
+Var PortNumber : Word = 2323;
+```
+
+Use `Word` when negative values are not required and the needed range exceeds `Byte`.
+
+## `LongInt`
+
+`LongInt` is a signed 4-byte integer type.
+
+```pascal
+Var TotalRecords : LongInt = 100000;
+```
+
+It is commonly used for:
+
+- Record counts
+- File-related values
+- Julian dates
+- Larger counters
+- Function results that exceed `Integer`
+
+The current Mystic reference contains an apparent typo in the displayed upper range for `LongInt`. This wiki therefore does not silently substitute a corrected boundary without compiler verification.
+
+## `Cardinal`
+
+The current MPL reference lists `Cardinal` as a numeric type with this range:
+
+```text
+0..4294967295
+```
+
+That corresponds to an unsigned 32-bit range.
+
+Example form:
+
+```pascal
+Var LargeUnsigned : Cardinal;
+```
+
+Because `Cardinal` is less common in older MPL examples, compiler support should be confirmed on older Mystic releases before using it in portable code.
+
+## `Real`
+
+Mystic 1.10 added the `Real` type for floating-point calculations.
+
+```pascal
+Var Average : Real;
+
+Begin
+  Average := 12.5;
+End;
+```
+
+Use `Real` when fractional values are required.
+
+The exact precision, storage size, rounding behavior, and conversion rules should be tested with the target compiler.
+
+## `File`
+
+Mystic 1.10 added a `File` type as part of the redesigned file-I/O system.
+
+The type is used with functions such as:
+
+```text
+fAssign
+fReset
+fReWrite
+fRead
+fWrite
+fClose
+```
+
+Conceptual declaration:
+
+```pascal
+Var DataFile : File;
+```
+
+The file-I/O redesign also changed error handling so programs could inspect `IoResult` instead of having all file errors automatically terminate the MPL program.
+
+See [File Handling](File-Handling) for the file API rather than treating `File` as a normal scalar value.
+
+## Arrays
+
+Arrays store multiple values of the same type.
+
+One-dimensional array:
+
+```pascal
+Var Scores : Array[1..10] of Integer;
+```
+
+Element access uses square brackets:
+
+```pascal
+Scores[1] := 100;
+```
+
+Mystic 1.10 changed array element syntax from parentheses to square brackets and added multidimensional arrays up to three dimensions.
+
+Two-dimensional example:
+
+```pascal
+Var Grid : Array[1..10, 1..10] of Byte;
+```
+
+Three-dimensional example:
+
+```pascal
+Var Cube : Array[1..10, 1..10, 1..10] of String[30];
+```
+
+Arrays deserve their own page because bounds, memory use, indexing, records inside arrays, and procedure/function parameters require additional testing.
+
+See [Arrays](Arrays).
+
+## Records
+
+Records group values of different types into one structured type.
+
+Example:
+
+```pascal
+Type
+  UserRec = Record
+    Name  : String[30];
+    Level : Byte;
+  End;
+
+Var UserInfo : UserRec;
+```
+
+Fields are accessed with a period:
+
+```pascal
+UserInfo.Name := 'Sysop';
+UserInfo.Level := 100;
+```
+
+Records can also contain arrays and other supported field types.
+
+See [Records](Records) for detailed record syntax and version-specific behavior.
+
+## Hexadecimal Numeric Literals
+
+Mystic 1.10 added hexadecimal numeric values.
+
+A hexadecimal value begins with `$`:
+
+```pascal
+Value := $10;
+```
+
+Hexadecimal values can also be used in numeric constants:
+
+```pascal
+Const
+  UserDeleted = $00000004;
+```
+
+See [Constants](Constants) and [Operators](Operators).
+
+## Literals and Types
+
+Common literal forms include:
+
+```pascal
+'Hello'     // String
+'A'         // Char-sized text literal when context expects Char
+#32         // Character by ASCII value
+42          // Decimal integer
+-10         // Negative numeric literal
+$1F         // Hexadecimal numeric literal
+12.5        // Real literal
+True        // Boolean
+False       // Boolean
+```
+
+The compiler determines whether a literal is compatible with the destination type.
 
 ## Type Conversion
 
-Converting a value from one type to another should be done with the appropriate MPL function rather than assuming automatic conversion.
+Do not assume automatic conversion between unrelated types.
 
-Common conversion tasks include:
-
-- Converting a number to text for display
-- Converting text input to a number
-- Converting a character code to a character
-- Converting a Boolean condition into display text
-
-The exact function names and accepted parameter types should be documented on the [Functions](Functions) page after verification.
-
-Avoid relying on implicit conversion until compiler behavior has been tested.
-
-## Comparisons
-
-Values of compatible types can be compared.
+For display, numeric values are commonly converted to strings explicitly:
 
 ```pascal
-If UserName = 'Sysop' Then
-  WriteLn('Welcome, Sysop');
-
-If UserCount >= 10 Then
-  WriteLn('User count is at least ten');
+WriteLn('Count: ' + Int2Str(Count));
 ```
 
-Comparing incompatible types may produce a compiler error or unexpected behavior.
+Other conversion functions should be documented by their exact signatures on [Functions](Functions).
 
-## Constants and Literal Values
+Important conversion areas include:
 
-A literal is a value written directly in source code:
+- Integer to string
+- String to integer
+- Character to numeric code
+- Numeric code to character
+- Real and integer conversion
+- Boolean display text
 
-```pascal
-'Hello'
-'A'
-42
--10
-True
-False
-```
+## Choosing a Numeric Type
 
-Constants are named values that do not change during execution.
+Use a type whose range matches the value being represented.
 
-See [Constants](Constants) for constant declarations and usage.
-
-## Choosing a Type
-
-Use the narrowest clear type that correctly represents the value:
-
-| Value being stored | Suggested type |
+| Requirement | Typical type |
 |---|---|
-| User-visible text | `String` |
-| One menu key | `Char` |
-| Small non-negative counter | `Byte`, if the verified range is sufficient |
-| General whole number | `Integer` |
-| Larger whole number | `LongInt`, if supported and required |
-| Enabled or disabled state | `Boolean` |
+| `0..255` | `Byte` |
+| Small signed whole number | `Integer` |
+| `0..65535` | `Word` |
+| Larger signed whole number | `LongInt` |
+| Larger unsigned whole number | `Cardinal` |
+| Fractional number | `Real` |
 
-Do not use a smaller numeric type merely to save space unless its range has been verified and the restriction is intentional.
+Do not choose a narrow type merely to save memory unless the range restriction is intentional.
+
+## Overflow and Boundary Values
+
+When a value exceeds the range of its type, results may depend on compiler checks and runtime behavior.
+
+Potential issues include:
+
+- Compile-time rejection
+- Runtime overflow
+- Value wrapping
+- Truncation
+- Incorrect comparisons
+
+Boundary behavior should be explicitly tested for the target Mystic and MPLC release.
 
 ## Common Errors
 
-### Assigning text to a numeric variable
+### Assigning Text to a Numeric Type
+
+Incorrect:
 
 ```pascal
 Age := '25';
 ```
 
-The quoted value is text, not a number.
+The quoted value is text.
 
-### Assigning multiple characters to a `Char`
+### Assigning Several Characters to `Char`
 
-```pascal
-MenuChoice := 'Yes';
-```
-
-Use a `String` for multiple characters.
-
-### Exceeding a numeric range
-
-A value outside the supported range may produce a compiler error, overflow, or incorrect runtime behavior.
-
-Verify numeric limits before using boundary values.
-
-### Assuming automatic conversion
+Incorrect:
 
 ```pascal
-WriteLn('Count: ' + UserCount);
+Choice := 'YES';
 ```
 
-This may require conversion of `UserCount` to a string first. Confirm the correct conversion function for the active compiler.
+Use `String` for multiple characters.
 
-### Confusing assignment and comparison
-
-Assignment uses:
+### Exceeding an Array Bound
 
 ```pascal
-:=
+Var Values : Array[1..10] of Byte;
 ```
 
-Comparison commonly uses:
+This is outside the declared range:
 
 ```pascal
-=
+Values[11] := 1;
 ```
 
-## Verification Checklist
+### Assuming Numeric-to-String Conversion
 
-Before marking this page as verified, test and record:
+Potentially invalid:
 
-- Supported data-type names
-- Whether type names are case-sensitive
-- Numeric ranges for `Byte`, `Integer`, and `LongInt`
-- Maximum `String` length
-- Character encoding used by `Char`
-- Boolean literal spelling and capitalization
-- Assignment compatibility rules
-- Available conversion functions
-- Overflow behavior
-- Behavior across supported Mystic versions
+```pascal
+WriteLn('Count: ' + Count);
+```
 
-Suggested verification record:
+Safer documented pattern:
+
+```pascal
+WriteLn('Count: ' + Int2Str(Count));
+```
+
+### Assuming Every Pascal Type Exists
+
+MPL is Pascal-like but not a complete Pascal implementation.
+
+Do not assume support for types such as:
+
+```text
+Int64
+Double
+Extended
+Pointer
+Set
+Variant
+Object
+Class
+```
+
+unless the target MPLC documentation or compiler test confirms them.
+
+## Suggested Compiler Tests
+
+Test at least:
+
+```text
+Boolean declaration and assignment
+Char declaration
+#nn character references
+String default length
+String[n] declaration
+String indexing
+Byte minimum and maximum
+Integer negative value
+Integer boundaries
+Word boundaries
+LongInt boundaries
+Cardinal boundaries
+Real arithmetic
+Hexadecimal assignment
+File declaration
+One-dimensional array
+Two-dimensional array
+Three-dimensional array
+Record declaration
+Record containing an array
+Declaration-time initialization
+Function-result initialization
+Numeric-to-string conversion
+Overflow behavior
+```
+
+Record the environment:
 
 ```text
 Mystic version:
+MPLC version:
 Operating system:
-Compiler path or build:
+Architecture:
 Date tested:
-Types confirmed:
-Numeric ranges confirmed:
-String limit confirmed:
-Conversion functions confirmed:
+Scalar types confirmed:
+String behavior confirmed:
+Numeric boundaries confirmed:
+Real behavior confirmed:
+File type confirmed:
+Arrays confirmed:
+Records confirmed:
 Notes:
 ```
+
+## Version Reference
+
+Mystic 1.10 was a major data-type and declaration milestone for MPL. It documented or introduced:
+
+- Pascal-style variable declarations
+- Negative numbers
+- `Real`
+- Explicit `String[n]` lengths
+- Local variable declarations
+- Declaration-time initialization
+- `File`
+- Square-bracket array indexing
+- Multidimensional arrays up to three dimensions
+- Hexadecimal numeric values
+- Revised variable memory handling
+
+Repository references:
+
+- [Mystic 1.10 Changes](../documents/mystic-changes/Mystic-1.10.md)
+- [MPL Change Index](../documents/mystic-changes/MPL-Change-Index.md)
+
+## Documentation Status
+
+Documented and suitable for reference:
+
+- `Boolean`
+- `Char`
+- `String`
+- `String[n]`
+- `Byte`
+- `Integer`
+- `Word`
+- `LongInt`
+- `Cardinal`
+- `Real`
+- `File`
+- Arrays up to three dimensions
+- Record structures
+- Hexadecimal numeric literals
+- Declaration-time initialization for non-array variables
+
+Still requiring targeted compiler verification:
+
+- Exact signed `Integer` boundary values
+- Exact signed `LongInt` boundary values
+- `Real` precision and storage
+- Overflow behavior
+- Implicit conversion rules
+- `Cardinal` support across older Mystic versions
+- Array initialization restrictions
+- Complex record nesting limits
+- 32-bit versus 64-bit compiler differences
 
 ## Related Pages
 
@@ -368,6 +644,15 @@ Notes:
 - [Constants](Constants)
 - [Operators](Operators)
 - [Conditional Logic](Conditional-Logic)
+- [Arrays](Arrays)
+- [Records](Records)
 - [Functions](Functions)
+- [File Handling](File-Handling)
+- [Compiler Behavior](Compiler-Behavior)
 - [Version Compatibility](Version-Compatibility)
 - [Documentation Status](Documentation-Status)
+
+## References
+
+- [Mystic BBS Wiki: Mystic Programming Language](https://wiki.mysticbbs.com/doku.php?id=mpl)
+- [Mystic BBS Wiki: Mystic 1.10 Changes](https://wiki.mysticbbs.com/doku.php?id=whats_new_110)
