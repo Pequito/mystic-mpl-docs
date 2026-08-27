@@ -790,6 +790,4 @@ Repository references:
 
 ## References
 
-- Mystic BBS Wiki: Mystic Programming Language
-- Mystic BBS Wiki: Mystic 1.10 Changes
 - Repository: `documents/mystic-changes/Mystic-1.10.md`
