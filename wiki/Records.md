@@ -678,18 +678,253 @@ Do not assume a record's memory layout matches Free Pascal, C, or an on-disk Mys
 
 ## Records and File I/O
 
-A custom MPL record is a language structure. It should not automatically be assumed to match Mystic's internal database record layout or a binary file format.
+A custom MPL record can also be stored in a binary data file. The file then contains one or more serialized record values.
 
-When reading or writing records:
+A custom record file is **not** automatically compatible with Mystic's internal user, message, file-base, configuration, or other database files. The record declaration used by the MPL program must match the data that was written.
 
-- Confirm the exact file API
-- Confirm the expected record size
-- Confirm field layout
-- Confirm string storage
-- Confirm compiler version
-- Confirm whether the file was created by Mystic, MPL, or another program
+### Example Record File
 
-See [File Handling](File-Handling).
+Define a record:
+
+```pascal
+Type
+  TUserInfo = Record
+    Name     : String[30];
+    Level    : Integer;
+    IsActive : Boolean;
+  End;
+```
+
+A file containing three values of this record can be visualized as:
+
+```text
+users.dat
+│
+├── Record 1
+│   ├── Name      : String[30]
+│   ├── Level     : Integer
+│   └── IsActive  : Boolean
+│
+├── Record 2
+│   ├── Name      : String[30]
+│   ├── Level     : Integer
+│   └── IsActive  : Boolean
+│
+└── Record 3
+    ├── Name      : String[30]
+    ├── Level     : Integer
+    └── IsActive  : Boolean
+```
+
+The actual file is binary. The diagram shows the logical record layout rather than literal text stored in the file.
+
+### Writing a Record File
+
+Late Mystic 1.10 added `fWriteRec` for writing an entire record to an opened MPL `File`.
+
+Example:
+
+```pascal
+Type
+  TUserInfo = Record
+    Name     : String[30];
+    Level    : Integer;
+    IsActive : Boolean;
+  End;
+
+Var
+  DataFile : File;
+  UserInfo : TUserInfo;
+
+Begin
+  UserInfo.Name := 'Example User';
+  UserInfo.Level := 20;
+  UserInfo.IsActive := True;
+
+  fAssign(DataFile, 'users.dat', 66);
+  fReWrite(DataFile);
+
+  If IoResult <> 0 Then
+  Begin
+    WriteLn('Unable to create users.dat');
+    Exit;
+  End;
+
+  fWriteRec(DataFile, UserInfo);
+
+  If IoResult <> 0 Then
+    WriteLn('Unable to write record');
+
+  fClose(DataFile);
+End.
+```
+
+This creates or rewrites `users.dat` and writes one complete `TUserInfo` record.
+
+### Writing Multiple Records
+
+The same open file can receive additional records:
+
+```pascal
+UserInfo.Name := 'Alpha';
+UserInfo.Level := 10;
+UserInfo.IsActive := True;
+fWriteRec(DataFile, UserInfo);
+
+UserInfo.Name := 'Bravo';
+UserInfo.Level := 25;
+UserInfo.IsActive := True;
+fWriteRec(DataFile, UserInfo);
+
+UserInfo.Name := 'Charlie';
+UserInfo.Level := 50;
+UserInfo.IsActive := False;
+fWriteRec(DataFile, UserInfo);
+```
+
+Conceptually:
+
+```text
+users.dat
+├── Alpha
+├── Bravo
+└── Charlie
+```
+
+Each entry is stored using the same `TUserInfo` record structure.
+
+### Reading a Record File
+
+Use `fReset` to open an existing file and `fReadRec` to read a complete record.
+
+```pascal
+Type
+  TUserInfo = Record
+    Name     : String[30];
+    Level    : Integer;
+    IsActive : Boolean;
+  End;
+
+Var
+  DataFile : File;
+  UserInfo : TUserInfo;
+
+Begin
+  fAssign(DataFile, 'users.dat', 66);
+  fReset(DataFile);
+
+  If IoResult <> 0 Then
+  Begin
+    WriteLn('Unable to open users.dat');
+    Exit;
+  End;
+
+  fReadRec(DataFile, UserInfo);
+
+  If IoResult = 0 Then
+  Begin
+    WriteLn('Name: ' + UserInfo.Name);
+    WriteLn('Level: ' + Int2Str(UserInfo.Level));
+
+    If UserInfo.IsActive Then
+      WriteLn('Status: Active')
+    Else
+      WriteLn('Status: Inactive');
+  End;
+
+  fClose(DataFile);
+End.
+```
+
+This example reads the first record from the file into `UserInfo`.
+
+Additional sequential reads can be used to process additional records. End-of-file handling should be tested and documented with the target MPLC build before using a production loop.
+
+### Record Size
+
+Mystic 1.10 added `SizeOf`, which can be used when working with record storage:
+
+```pascal
+WriteLn('Record size: ' + Int2Str(SizeOf(UserInfo)));
+```
+
+For lower-level access, `fRead` and `fWrite` can address individual values or blocks using explicit sizes.
+
+For example, the 1.10 file-I/O redesign documents these storage sizes:
+
+```text
+Byte, Char    = 1 byte
+Integer, Word = 2 bytes
+LongInt       = 4 bytes
+String[n]     = n + 1 bytes
+```
+
+When an entire compatible record can be read or written with `fReadRec` / `fWriteRec`, that is usually clearer than manually reproducing every field size.
+
+### Historical 1.10 Note
+
+During the early Mystic 1.10 parser/file-I/O redesign, the old `fReadRec` and `fWriteRec` functions were temporarily removed in favor of `fRead` and `fWrite`.
+
+Later in the 1.10 development cycle, `fReadRec` and `fWriteRec` were added back so complete records and arrays of records could be handled directly.
+
+For that reason, code using these functions should be associated with the exact Mystic 1.10 alpha/final build or a later compatible release.
+
+### Record File Compatibility
+
+A record file is only useful when the reader expects the same layout that the writer used.
+
+Changing the record definition can change the binary layout.
+
+For example, changing:
+
+```pascal
+Type
+  TUserInfo = Record
+    Name  : String[30];
+    Level : Integer;
+  End;
+```
+
+to:
+
+```pascal
+Type
+  TUserInfo = Record
+    Name     : String[50];
+    Level    : Integer;
+    IsActive : Boolean;
+  End;
+```
+
+changes the stored record structure.
+
+An older `users.dat` file should therefore not be assumed to remain compatible after the record definition changes.
+
+For persistent application data, document:
+
+- Record type name
+- Field order
+- Field types
+- String lengths
+- Record size
+- File format version
+- Mystic version
+- MPLC version
+
+Example metadata:
+
+```text
+File: users.dat
+Format version: 1
+Record type: TUserInfo
+Record size: verified with SizeOf
+Mystic version:
+MPLC version:
+Architecture:
+Date verified:
+```
+
+See [File Handling](File-Handling) for the broader MPL file API.
 
 ## Records and Mystic Runtime Data
 
