@@ -76,24 +76,41 @@ The exact location used by Mystic depends on the local installation and configur
 
 ## MPL Program Structure
 
-A small MPL program normally contains a program declaration followed by a main block.
+An MPL source file can be a small statement-only script or a larger structured program containing declarations, procedures, functions, and a main executable block.
+
+A minimal script can be as small as:
 
 ```pascal
-Program HelloWorld;
+WriteLn('Hello from Mystic MPL!');
+WriteLn('|PA');
+```
+
+A larger program may use a Pascal-style structure:
+
+```pascal
+Var
+  UserName : String = 'Mystic User';
+
+Procedure ShowGreeting;
+Begin
+  WriteLn('Hello, ' + UserName);
+End;
 
 Begin
-  WriteLn('Hello from Mystic MPL!');
+  ShowGreeting;
 End.
 ```
 
-This example demonstrates the basic shape of an MPL program:
+This example demonstrates:
 
-- `Program HelloWorld;` declares the program name.
-- `Begin` starts the main program block.
-- `WriteLn(...)` displays a line of text.
-- `End.` closes the program.
+- A `Var` section for program-level data
+- A procedure declared before executable code
+- A final `Begin` / `End` block containing the main program flow
+- Semicolon-terminated statements and declarations
 
-The example is intentionally small. Compilation and runtime behavior should be tested with the Mystic release installed on your system.
+Traditional Pascal often begins with a declaration such as `Program HelloWorld;`. Mystic's current MPL examples generally begin directly with declarations or executable statements, so this documentation does **not** treat a `Program Name;` header as required MPL syntax.
+
+See [Program Structure](Program-Structure) for declaration order, scope, blocks, routines, minimal scripts, and compiler-specific structure notes.
 
 ## Where to Continue
 
